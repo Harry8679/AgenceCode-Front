@@ -57,7 +57,7 @@ const Navbar = () => {
                             <path strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' d='M4 6h16M4 12h16M4 18h16' />
                         </svg>
                         <svg className={cn('h-6 w-6', open && 'hidden')} fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                            <path strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' d='M6 18h18M4 6M6 6l12 12' />
+                            <path strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
                         </svg>
                     </button>
             </div>
