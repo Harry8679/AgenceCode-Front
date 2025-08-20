@@ -23,6 +23,12 @@ const Home = () => {
                         <Link to='/inscription' className='rounded-xl bg-indigo-600 px-5 py-3 text-white font-semibold hover:bg-indigo-700'>Créer un compte</Link>
                         <Link to='/connexion' className='rounded-xl border border-slate-200 bg-white px-5 py-3 text-slate-800 hover:bg-slate-50'>Se connecter</Link>
                     </div>
+
+                    <ul className='mt-6 grid gap-2 text-slate-700'>
+                        <li>* Profs vérifiés et évalués</li>
+                        <li>* Paiement sécurisé, annulation flexible</li>
+                        <li>* Suivi des progrès de l'élève</li>
+                    </ul>
                 </div>
             </div>
         </section>
