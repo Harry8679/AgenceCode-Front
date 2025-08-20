@@ -61,6 +61,42 @@ const Home = () => {
                 ))}
             </div>
         </section>
+
+        {/* ========== COMMENT ÇA MARCHE ========== */}
+        <section className="bg-white">
+            <div className='mx-auto max-w-7xl px-4 py-14'>
+                <h2 className='text-2xl font-bold text-slate-900'>Comment ça marche ?</h2>
+                <p className='mt-1 text-slate-600'>3 étapes rapides pour démarrer.</p>
+
+                <div className='mt-8 grid gap-6 md:grid-cols-3'>
+                    {[
+                        {
+                            step: '1',
+                            title: 'Recherchez',
+                            text: 'Filtrer par matière, niveau, prix et disponibilité.'
+                        },
+                        {
+                            step: '2',
+                            title: 'Réservez',
+                            text: 'Choisissez un créneau et payer en toute sécurité.'
+                        },
+                        {
+                            step: '3',
+                            title: 'Progressez',
+                            text: 'Cours en visio ou à domicile + suivi des progrès.'
+                        },
+                    ].map((card) => (
+                        <div key={card.step} className='rounded-2xl border border-slate-100 bg-white p-6 shadow-sm'>
+                            <div className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 text-white'>
+                                {card.step}
+                            </div>
+                            <h3 className='mt-4 text-lg font-semibold text-slate-900'>{card.title}</h3>
+                            <p className='text-slate-600'>{card.text}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
     </div>
   )
 }
