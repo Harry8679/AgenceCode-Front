@@ -30,8 +30,25 @@ const Navbar = () => {
                     </div>
                     <span className='text-lg font-semibold text-gray-900'>Agence Code</span>
                 </Link>
-                
+
                 {/* Ddesktop nav */}
+                <nav className='hidden md:flex items-center gap-2'>
+                    {navItems.map((item) => (
+                        <NavLink key={item.to} to={item.to} className={({ isActive }) => cn(linkActive ? linkActive : linkIdle)}>
+                            {item.label}
+                        </NavLink>
+                    ))}
+                </nav>
+
+                {/* Actions */}
+                <div className='hidden md:flex items-center gap-2'>
+                    <Link to='/connexion' className='px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50'>
+                        Se connecter
+                    </Link>
+                    <Link to='/inscription' className='px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700'>
+                        Créer un compte
+                    </Link>
+                </div>
             </div>
         </div>
     </header>
