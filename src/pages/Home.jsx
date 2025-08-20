@@ -30,6 +30,10 @@ const Home = () => {
                         <li>* Suivi des progrès de l'élève</li>
                     </ul>
                 </div>
+
+                <div className='overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-xl'>
+                    <img src='https://images.unsplash.com/photo-1596495578065-8e9e96e0b3cf?q=80&w=1280&auto=format&fit=crop' alt='Elève suivant un cours en ligne' className='aspect-video w-full object-cover' />
+                </div>
             </div>
         </section>
     </div>
