@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, NavLink } from 'react-router-dom';
 
 const cn = (...a) => {
-    return a.filter(Boolean).join('');
+    return a.filter(Boolean).join(' ');
 }
 
 const Navbar = () => {
