@@ -14,10 +14,27 @@ const Navbar = () => {
 
   const navItems = [
     { to: '/', label: 'Accueil' },
+    { to: '/cours-particuliers', label: 'Cours particuliers' },
+    { to: '/donner-des-cours', label: 'Donner des cours' },
+    { to: '/stage-intensifs', label: 'Stage Intensifs' },
   ]
 
   return (
-    <h1>Test</h1>
+    <header className='sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100'>
+        <div className='mx-auto max-w-6xl px-4'>
+            <div className='flex h-16 items-center justify-between'>
+                {/* Logo */}
+                <Link to='/' className='inline-flex items-center gap-2'>
+                    <div className='h-9 w-9 rounded-xl bg-indigo-600 text-white grid place-items-center font-bold'>
+                        AC
+                    </div>
+                    <span className='text-lg font-semibold text-gray-900'>Agence Code</span>
+                </Link>
+                
+                {/* Ddesktop nav */}
+            </div>
+        </div>
+    </header>
   )
 }
 export default Navbar;
