@@ -125,6 +125,24 @@ const Home = () => {
                 ))}
             </div>
         </section>
+
+        {/* ========== BANDEAU CTA ========== */}
+        <section className='px-4 pb-16'>
+            <div className='mx-auto max-w-7xl overflow-hidden rounded-3xl border border-slate-100 bg-gradient-to-tr from-indigo-600 to-emerald-500 p-8 text-white shadow-xl md:p-12'>
+                <h3 className='text-2xl font-bold'>Prêt à commencer ?</h3>
+                <p className='mt-2 text-indigo-50'>
+                    Créer votre compte et réservez votre premier cours aujourd'hui.
+                </p>
+                <div className='mt-6 flex flex-wrap gap-3'>
+                    <Link to='/inscription' className='rounded-xl bg-white px-5 py-3 font-semibold text-slate-900 hover:bg-sky-100'>
+                        Créer un compte
+                    </Link>
+                    <Link to='/connexion' className='rounded-xl border border-white/40 px-5 py-3 font-semibold text-white hover:bg-white/10'>
+                        Se connecter
+                    </Link>
+                </div>
+            </div>
+        </section>
     </div>
   )
 }
