@@ -9,7 +9,7 @@ function App() {
     <Router>
       <Routes>
         <Route path='/inscription' element={<Register />} />
-        <Route path='/se-connecter' element={<Login />} />
+        <Route path='/connexion' element={<Login />} />
         <Route path='/' element={<Home />} />
       </Routes>
     </Router>
