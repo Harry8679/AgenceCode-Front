@@ -72,7 +72,12 @@ const Navbar = () => {
                         ))}
                     </nav>
                     <div className='mt-3 flex flex-col gap-2'>
-                        <Link to='/connexion'
+                        <Link to='/connexion' onClick={() => setOpen(false)} className='w-full px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 text-center hover:bg-gray-50'>
+                            Se connecter
+                        </Link>
+                        <Link to='/inscription' onClick={() => setOpen(false)} className='w-full px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium text-center hover:bg-indigo-700'>
+                            Créer un compte
+                        </Link>
                     </div>
                 </div>
             )}
