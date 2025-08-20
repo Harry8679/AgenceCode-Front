@@ -61,6 +61,21 @@ const Navbar = () => {
                     </svg>
                 </button>
             </div>
+            {/* Mobile Panel */}
+            {open && (
+                <div className='md:hidden pb-4'>
+                    <nav className='flex flex-col gap-1'>
+                        {navItems.map((item) => (
+                            <NavLink key={item.to} to={item.to} onClick={() => setOpen(false)} className={({ isActive }) => cn(linkBase, isActive ? linkActive : linkActive)} end>
+                                {item.label}
+                            </NavLink>
+                        ))}
+                    </nav>
+                    <div className='mt-3 flex flex-col gap-2'>
+                        <Link to='/connexion'
+                    </div>
+                </div>
+            )}
         </div>
     </header>
   )
