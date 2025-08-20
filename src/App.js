@@ -1,11 +1,16 @@
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Register from './pages/Register';
+import Login from './pages/Login';
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* <Route path='/' element={< />} */}
+        <Route path='/inscription' element={<Register />} />
+        <Route path='/se-connecter' element={<Login />} />
+        <Route path='/' element={<Home />} />
       </Routes>
     </Router>
   );
