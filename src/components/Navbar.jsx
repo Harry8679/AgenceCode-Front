@@ -49,6 +49,17 @@ const Navbar = () => {
                         Créer un compte
                     </Link>
                 </div>
+
+                {/* Burger Mobile */}
+                <button onClick={() => setOpen((s) => !s)} className='md:hidden inline-flex items-center justify-center rounded-lg p-2 text-gray-700 hover:bg-gray-100' 
+                    aria-label="Ouvrir le menu" aria-expanded={open}>
+                        <svg className={cn('h-6 w-6', open && 'hidden')} fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                            <path strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' d='M4 6h16M4 18h16' />
+                        </svg>
+                        <svg className={cn('h-6 w-6', open && 'hidden')} fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                            <path strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' d='M6 18h18M4 6M6 6l12 12' />
+                        </svg>
+                    </button>
             </div>
         </div>
     </header>
