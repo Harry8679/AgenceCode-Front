@@ -10,7 +10,7 @@ const Navbar = () => {
 
   const linkBase = "block px-3 py-2 rounded-lg text-sm font-medium transition";
   const linkIdle = "text-gray-600 hover:text-gray-900 hover:bg-gray-100";
-  const linkActive = "text-indigo-700 bg-indigo-50";
+  const linkActive = "text-indigo-700 bg-indigo-200";
 
   const navItems = [
     { to: '/', label: 'Accueil' },
@@ -34,7 +34,7 @@ const Navbar = () => {
                 {/* Ddesktop nav */}
                 <nav className='hidden md:flex items-center gap-2'>
                     {navItems.map((item) => (
-                        <NavLink key={item.to} to={item.to} className={({ isActive }) => cn(linkActive ? linkActive : linkIdle)}>
+                        <NavLink key={item.to} to={item.to} className={({ isActive }) => cn(linkBase, isActive ? linkActive : linkIdle)}>
                             {item.label}
                         </NavLink>
                     ))}
