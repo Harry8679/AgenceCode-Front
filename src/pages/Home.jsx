@@ -55,7 +55,7 @@ const Home = () => {
                         <h3 className='mt-3 text-lg font-semibold text-slate-600'>{s.title}</h3>
                         <p className='text-sm text-slate-600'>{s.desc}</p>
                         <Link to='/inscription' className='mt-4 inline-block rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800'>
-                            Trouvez un prof
+                            Trouvez un professeur
                         </Link>
                     </div>
                 ))}
