@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-// import DefaultLayout from "../components/DefaultLayout";
 import { useAuth } from "../context/AuthContext";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || ""; // utiliser proxy CRA ou .env
