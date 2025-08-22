@@ -100,8 +100,7 @@ const Register = () => {
   };
 
   return (
-    <DefaultLayout>
-      <div className="flex items-center justify-center min-h-screen px-4 py-10 bg-gradient-to-b from-blue-50 to-white">
+    <div className="flex items-center justify-center min-h-screen px-4 py-10 bg-gradient-to-b from-blue-50 to-white">
         <ToastContainer />
         <div className="grid w-full max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
           {/* Colonne gauche : Accroche */}
@@ -244,7 +243,6 @@ const Register = () => {
           </div>
         </div>
       </div>
-    </DefaultLayout>
   );
 };
 
