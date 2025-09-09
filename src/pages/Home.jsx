@@ -40,7 +40,7 @@ const Home = () => {
 
         {/* ========== MATIERES ========== */}
         <section className='mx-auto max-w-7xl px-4 py-14'>
-            <h2 className='text-2xl font-bold text-slate-900'>Matières populaires</h2>
+            <h2 className='text-2xl font-bold text-slate-900'>Matières enseignées</h2>
             <p className='mt-1 text-slate-600'>Choisissez une matière et lancez-vous.</p>
 
             <div className='mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
