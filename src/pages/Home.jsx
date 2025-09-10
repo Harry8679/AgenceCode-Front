@@ -6,53 +6,53 @@ const Home = () => {
     <div className='min-h-screen'>
         {/* ========== HERO ========== */}
         <section className="relative overflow-hidden">
-  {/* Image en fond */}
-  <img
-    src={imgStudent}
-    alt=""
-    aria-hidden
-    className="absolute inset-0 -z-10 h-full w-full object-cover"
-  />
+            {/* Image en fond */}
+            <img
+                src={imgStudent}
+                alt=""
+                aria-hidden
+                className="absolute inset-0 -z-10 h-full w-full object-cover"
+            />
 
-  {/* Voile clair (éclaircit l'image) */}
-  <div className="absolute inset-0 -z-10 bg-gradient-to-r from-white/85 via-white/60 to-white/30" />
+            {/* Voile clair (éclaircit l'image) */}
+            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-white/85 via-white/60 to-white/30" />
 
-  {/* Contenu */}
-  <div className="mx-auto max-w-7xl px-4 py-16 md:py-24">
-    <div className="max-w-2xl">
-      <h1 className="text-4xl font-extrabold leading-tight text-slate-900 md:text-5xl">
-        Le soutien scolaire, <span className="text-indigo-600">simple</span> et{" "}
-        <span className="text-emerald-600">efficace</span>
-      </h1>
+            {/* Contenu */}
+            <div className="mx-auto max-w-7xl px-4 py-16 md:py-24">
+                <div className="max-w-2xl">
+                <h1 className="text-4xl font-extrabold leading-tight text-slate-900 md:text-5xl">
+                    Le soutien scolaire, <span className="text-indigo-600">simple</span> et{" "}
+                    <span className="text-emerald-600">efficace</span>
+                </h1>
 
-      <p className="mt-4 text-lg text-slate-700">
-        Trouver des professeurs de confiance en Maths, Physique, Chimie et Informatique.
-        Réservez en quelques clics, en ligne ou à domicile.
-      </p>
+                <p className="mt-4 text-lg text-slate-700">
+                    Trouver des professeurs de confiance en Maths, Physique, Chimie et Informatique.
+                    Réservez en quelques clics, en ligne ou à domicile.
+                </p>
 
-      <div className="mt-8 flex flex-wrap gap-3">
-        <Link
-          to="/inscription"
-          className="rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white hover:bg-indigo-700"
-        >
-          Créer un compte
-        </Link>
-        <Link
-          to="/connexion"
-          className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-800 hover:bg-slate-50"
-        >
-          Se connecter
-        </Link>
-      </div>
+                <div className="mt-8 flex flex-wrap gap-3">
+                    <Link
+                    to="/inscription"
+                    className="rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white hover:bg-indigo-700"
+                    >
+                    Créer un compte
+                    </Link>
+                    <Link
+                    to="/connexion"
+                    className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-800 hover:bg-slate-50"
+                    >
+                    Se connecter
+                    </Link>
+                </div>
 
-      <ul className="mt-6 space-y-2 text-slate-800">
-        <li>• Profs vérifiés et évalués</li>
-        <li>• Paiement sécurisé, annulation flexible</li>
-        <li>• Suivi des progrès de l’élève</li>
-      </ul>
-    </div>
-  </div>
-</section>
+                <ul className="mt-6 space-y-2 text-slate-800">
+                    <li>• Profs vérifiés et évalués</li>
+                    <li>• Paiement sécurisé, annulation flexible</li>
+                    <li>• Suivi des progrès de l’élève</li>
+                </ul>
+                </div>
+            </div>
+        </section>
 
 
         {/* ========== MATIERES ========== */}
