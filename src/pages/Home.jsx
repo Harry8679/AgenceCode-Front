@@ -49,6 +49,7 @@ const Home = () => {
                     <li>• Profs vérifiés et évalués</li>
                     <li>• Paiement sécurisé, annulation flexible</li>
                     <li>• Suivi des progrès de l’élève</li>
+                    <li>• Suivi des progrès de l’élève</li>
                 </ul>
                 </div>
             </div>
