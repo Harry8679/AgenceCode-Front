@@ -395,30 +395,35 @@ const Home = () => {
         <h2 className="text-2xl font-bold text-slate-900">Matières enseignées</h2>
         <p className="mt-1 text-slate-600">Choisissez une matière et lancez-vous.</p>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { title: "Maths", desc: "Du primaire au supérieur", emoji: "📐" },
-            { title: "Physique", desc: "Mécanique, optique ...", emoji: "⚛️" },
-            { title: "Chimie", desc: "Du primaire au supérieur", emoji: "🧪" },
-            { title: "Informatique", desc: "Du primaire au supérieur", emoji: "🖥" },
-          ].map((s) => (
-            <div
-              key={s.title}
-              className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md"
-            >
-              <div className="text-3xl">{s.emoji}</div>
-              <h3 className="mt-3 text-lg font-semibold text-slate-600">{s.title}</h3>
-              <p className="text-sm text-slate-600">{s.desc}</p>
-              <Link
-                to="/inscription"
-                className="mt-4 inline-block rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+        {/* Sur desktop : on limite la largeur à 50% pour libérer la colonne de droite */}
+        <div className="mt-6 lg:w-1/2">
+          {/* Toujours 2 cartes par ligne dès sm; pas de 4 colonnes en lg */}
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+            {[
+              { title: "Maths", desc: "Du primaire au supérieur", emoji: "📐" },
+              { title: "Physique", desc: "Mécanique, optique ...", emoji: "⚛️" },
+              { title: "Chimie", desc: "Du primaire au supérieur", emoji: "🧪" },
+              { title: "Informatique", desc: "Du primaire au supérieur", emoji: "🖥" },
+            ].map((s) => (
+              <div
+                key={s.title}
+                className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md"
               >
-                Trouvez un professeur
-              </Link>
-            </div>
-          ))}
+                <div className="text-3xl">{s.emoji}</div>
+                <h3 className="mt-3 text-lg font-semibold text-slate-600">{s.title}</h3>
+                <p className="text-sm text-slate-600">{s.desc}</p>
+                <Link
+                  to="/inscription"
+                  className="mt-4 inline-block rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800"
+                >
+                  Trouvez un professeur
+                </Link>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
+
 
       {/* ========== COMMENT ÇA MARCHE ========== */}
       <section className="bg-white">
