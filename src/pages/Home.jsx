@@ -87,46 +87,52 @@ function ContactDevisForm() {
     return true;
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  // envoi EmailJS (sans "!" et avec garde si .env manquant)
+async function handleSubmit(e) {
+  e.preventDefault();
+  if (!validate()) return;
 
-    setLoading(true);
-    try {
-      const templateParams = {
-        profile: profileLabel,
-        classe,
-        matieres: matieres.join(", "),
-        matiere_autre: matiereAutre,
-        format_cours: formatCours,
-        demande,
-        nom,
-        prenom,
-        email,
-        phone,
-        ville,
-        code_postal: codePostal,
-      };
+  setLoading(true);
+  try {
+    const serviceId  = process.env.REACT_APP_EMAILJS_SERVICE_ID;
+    const templateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID;
+    const publicKey  = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
 
-      await emailjs.send(
-        process.env.REACT_APP_EMAILJS_SERVICE_ID!,
-        process.env.REACT_APP_EMAILJS_TEMPLATE_ID!,
-        templateParams,
-        process.env.REACT_APP_EMAILJS_PUBLIC_KEY!
-      );
-
-      setOkMsg("Merci ! Votre demande a bien été envoyée. Nous revenons vers vous rapidement.");
-      setErrMsg("");
-      // Reset partiel
-      setMatieres([]); setMatiereAutre(""); setFormatCours(""); setDemande("");
-    } catch (err) {
-      console.error(err);
-      setErrMsg("Erreur lors de l’envoi. Merci de réessayer dans un instant.");
-      setOkMsg("");
-    } finally {
+    if (!serviceId || !templateId || !publicKey) {
+      setErrMsg("EmailJS n'est pas configuré. Ajoute REACT_APP_EMAILJS_SERVICE_ID / TEMPLATE_ID / PUBLIC_KEY dans .env puis redémarre le serveur.");
       setLoading(false);
+      return;
     }
+
+    const templateParams = {
+      profile: profileLabel,
+      classe,
+      matieres: matieres.join(", "),
+      matiere_autre: matiereAutre,
+      format_cours: formatCours,
+      demande,
+      nom,
+      prenom,
+      email,
+      phone,
+      ville,
+      code_postal: codePostal,
+    };
+
+    await emailjs.send(serviceId, templateId, templateParams, publicKey);
+
+    setOkMsg("Merci ! Votre demande a bien été envoyée.");
+    setErrMsg("");
+    setMatieres([]); setMatiereAutre(""); setFormatCours(""); setDemande("");
+  } catch (err) {
+    console.error(err);
+    setErrMsg("Erreur lors de l’envoi. Réessaie dans un instant.");
+    setOkMsg("");
+  } finally {
+    setLoading(false);
   }
+}
+
 
   return (
     <div className="w-full md:max-w-md md:ml-auto">
