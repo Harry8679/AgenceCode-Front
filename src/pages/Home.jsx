@@ -342,52 +342,52 @@ const Home = () => {
     <div className="min-h-screen">
       {/* ========== HERO (image de fond + grille 50/50) ========== */}
       <section className="relative overflow-visible min-h-[80vh]">
-  {/* Image en fond */}
-  <img
-    src={imgStudent}
-    alt=""
-    aria-hidden
-    className="absolute inset-0 -z-10 h-full w-full object-cover"
-  />
-  {/* Voile pour lisibilité */}
-  <div className="absolute inset-0 -z-10 bg-gradient-to-r from-white/85 via-white/60 to-white/30" />
+        {/* Image en fond */}
+        <img
+          src={imgStudent}
+          alt=""
+          aria-hidden
+          className="absolute inset-0 -z-10 h-full w-full object-cover"
+        />
+        {/* Voile pour lisibilité */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-white/85 via-white/60 to-white/30" />
 
-  <div className="mx-auto grid max-w-7xl grid-cols-1 items-start gap-10 px-4 py-16 md:grid-cols-2 md:py-24">
-    {/* 50% gauche : texte */}
-    <div className="max-w-2xl">
-      <h1 className="text-4xl font-extrabold leading-tight text-slate-900 md:text-5xl">
-        Le soutien scolaire, <span className="text-indigo-600">simple</span> et{" "}
-        <span className="text-emerald-600">efficace</span>
-      </h1>
-      <p className="mt-4 text-lg text-slate-700">
-        Trouver des professeurs de confiance en Maths, Physique, Chimie et Informatique.
-        Réservez en quelques clics, en ligne ou à domicile.
-      </p>
+        <div className="mx-auto grid max-w-7xl grid-cols-1 items-start gap-10 px-4 py-16 md:grid-cols-2 md:py-24">
+          {/* 50% gauche : texte */}
+          <div className="max-w-2xl">
+            <h1 className="text-4xl font-extrabold leading-tight text-slate-900 md:text-5xl">
+              Le soutien scolaire, <span className="text-indigo-600">simple</span> et{" "}
+              <span className="text-emerald-600">efficace</span>
+            </h1>
+            <p className="mt-4 text-lg text-slate-700">
+              Trouver des professeurs de confiance en Maths, Physique, Chimie et Informatique.
+              Réservez en quelques clics, en ligne ou à domicile.
+            </p>
 
-      <div className="mt-8 flex flex-wrap gap-3">
-        <Link to="/inscription" className="rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white hover:bg-indigo-700">
-          Créer un compte
-        </Link>
-        <Link to="/connexion" className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-800 hover:bg-slate-50">
-          Se connecter
-        </Link>
-      </div>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link to="/inscription" className="rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white hover:bg-indigo-700">
+                Créer un compte
+              </Link>
+              <Link to="/connexion" className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-slate-800 hover:bg-slate-50">
+                Se connecter
+              </Link>
+            </div>
 
-      <ul className="mt-6 space-y-2 text-slate-800">
-        <li>• Profs vérifiés et évalués</li>
-        <li>• Paiement sécurisé, annulation flexible</li>
-        <li>• Suivi des progrès de l’élève</li>
-      </ul>
-    </div>
+            <ul className="mt-6 space-y-2 text-slate-800">
+              <li>• Profs vérifiés et évalués</li>
+              <li>• Paiement sécurisé, annulation flexible</li>
+              <li>• Suivi des progrès de l’élève</li>
+            </ul>
+          </div>
 
-    {/* 50% droite : formulaire, le haut du formulaire démarre à 80% de la hauteur de la colonne */}
-    <div className="relative min-h-[80vh]">
-      <div className="md:absolute md:top-[80%] md:left-0 md:w-full">
-        <ContactProfileForm />
-      </div>
-    </div>
-  </div>
-</section>
+          {/* 50% droite : formulaire, le haut du formulaire démarre à 80% de la hauteur de la colonne */}
+          <div className="relative min-h-[80vh]">
+            <div className="md:absolute md:top-[50%] md:left-0 md:w-full">
+              <ContactProfileForm />
+            </div>
+          </div>
+        </div>
+      </section>
 
 
       {/* ========== MATIERES ========== */}
