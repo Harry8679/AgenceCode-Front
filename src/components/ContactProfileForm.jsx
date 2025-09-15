@@ -305,3 +305,5 @@ function ContactProfileForm() {
     </div>
   );
 }
+
+export default ContactProfileForm;
