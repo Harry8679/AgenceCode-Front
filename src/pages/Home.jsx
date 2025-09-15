@@ -27,7 +27,7 @@ function ContactDevisForm() {
 
   // Champs spécifiques
   const [classe, setClasse] = useState("");
-  const [matieres, setMatieres] = useState<string[]>([]);
+  const [matieres, setMatieres] = useState([]);
   const [matiereAutre, setMatiereAutre] = useState("");
   const [formatCours, setFormatCours] = useState("");     // Parent
   const [demande, setDemande] = useState("");             // Curieux(se)
@@ -42,7 +42,7 @@ function ContactDevisForm() {
     return "Curieux(se)";
   }, [profile, isParent, isStudent]);
 
-  function toggleMatiere(m: string) {
+  function toggleMatiere(m) {
     setMatieres((prev) =>
       prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]
     );
