@@ -79,3 +79,5 @@ function PromoDoubleCard({ leftImg = imgStudent, rightImg = imgStudent }) {
     </section>
   );
 }
+
+export default PromoDoubleCard;
