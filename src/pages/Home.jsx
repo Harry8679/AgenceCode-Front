@@ -4,6 +4,7 @@ import imgStudent from "../assets/images/students.jpg";
 import { useMemo, useState } from "react";
 import emailjs from "@emailjs/browser";
 import ContactProfileForm from "../components/ContactProfileForm";
+import PromoDoubleCard from "../components/PromoDoubleCard";
 
 const CLASSES = [
   "6e", "5e", "4e", "3e", "2nde", "1ère", "Terminale",
@@ -423,6 +424,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      <PromoDoubleCard />
 
 
       {/* ========== COMMENT ÇA MARCHE ========== */}
