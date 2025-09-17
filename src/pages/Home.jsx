@@ -7,9 +7,6 @@ import ContactProfileForm from "../components/ContactProfileForm";
 import PromoDoubleCard from "../components/PromoDoubleCard";
 import studentCut1 from '../assets/images/student-cut1.jpg';
 import studentCut2 from '../assets/images/student-cut2.jpg';
-// import studentCut1 from "../assets/images/student-cut1.png";
-// import studentCut2 from "../assets/images/student-cut2.png";
-// import studentCut from "../assets/images/student-cut.png";
 
 const CLASSES = [
   "6e", "5e", "4e", "3e", "2nde", "1ère", "Terminale",
