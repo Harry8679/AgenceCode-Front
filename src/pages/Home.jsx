@@ -480,6 +480,25 @@ const Home = () => {
         </div>
       </section>
 
+      <TeacherVideosGrid
+        videos={[
+          { id: "VIDEO_ID_1", title: "Cours : Dérivées en Terminale" },
+          { id: "VIDEO_ID_2", title: "Méthode : Résolution d'équations" },
+          { id: "VIDEO_ID_3", title: "Algorithmes : bases en Python" },
+        ]}
+      />
+
+      <TeacherVideosCarousel
+        videos={[
+          { id: "VIDEO_ID_1", title: "Cours : Dérivées en Terminale" },
+          { id: "VIDEO_ID_2", title: "Méthode : Résolution d'équations" },
+          { id: "VIDEO_ID_3", title: "Algorithmes : bases en Python" },
+          { id: "VIDEO_ID_4", title: "Chimie : réactions acido-basiques" },
+          { id: "VIDEO_ID_5", title: "Physique : optique géométrique" },
+          { id: "VIDEO_ID_6", title: "Maths : probabilités" },
+        ]}
+      />
+
       {/* ========== BANDEAU CTA ========== */}
       <section className="px-4 pb-16">
         <div className="mx-auto max-w-7xl overflow-hidden rounded-3xl border border-slate-100 bg-gradient-to-tr from-indigo-600 to-emerald-500 p-8 text-white shadow-xl md:p-12">
