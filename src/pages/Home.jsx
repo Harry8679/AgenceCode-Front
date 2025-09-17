@@ -484,20 +484,20 @@ const Home = () => {
 
       <TeacherVideosGrid
         videos={[
-          { id: "VIDEO_ID_1", title: "Cours : Dérivées en Terminale" },
-          { id: "VIDEO_ID_2", title: "Méthode : Résolution d'équations" },
-          { id: "VIDEO_ID_3", title: "Algorithmes : bases en Python" },
+          { id: "LjRmzhvIIY8", title: "Cours : Dérivées en Terminale" },
+          { id: "-GmIs6Cekhk", title: "Méthode : Résolution d'équations" },
+          { id: "n5DEuSKj4A8", title: "Algorithmes : bases en Python" },
         ]}
       />
 
       <TeacherVideosCarousel
         videos={[
-          { id: "VIDEO_ID_1", title: "Cours : Dérivées en Terminale" },
-          { id: "VIDEO_ID_2", title: "Méthode : Résolution d'équations" },
-          { id: "VIDEO_ID_3", title: "Algorithmes : bases en Python" },
-          { id: "VIDEO_ID_4", title: "Chimie : réactions acido-basiques" },
-          { id: "VIDEO_ID_5", title: "Physique : optique géométrique" },
-          { id: "VIDEO_ID_6", title: "Maths : probabilités" },
+          { id: "LjRmzhvIIY8", title: "Cours : Dérivées en Terminale" },
+          { id: "-GmIs6Cekhk", title: "Méthode : Résolution d'équations" },
+          { id: "n5DEuSKj4A8", title: "Algorithmes : bases en Python" },
+          { id: "yvvuIt5OcIc", title: "Chimie : réactions acido-basiques" },
+          { id: "6CxX5CIs1tc", title: "Physique : optique géométrique" },
+          { id: "I8F7aTkjskU", title: "Maths : probabilités" },
         ]}
       />
 
