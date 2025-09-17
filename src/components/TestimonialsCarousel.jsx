@@ -10,7 +10,7 @@ const ITEMS = [
   { quote: "Très satisfaite du prof de physique-chimie.",                      name: "Inès, Marseille",rating: 5 },
 ];
 
-const INTERVAL_MS = 1000; // 1 seconde
+const INTERVAL_MS = 2500; // 1 seconde
 
 const getVisible = () =>
   window.innerWidth >= 1024 ? 3 : window.innerWidth >= 768 ? 2 : 1;
