@@ -474,29 +474,8 @@ const Home = () => {
         <h2 className="text-2xl font-bold text-slate-900">Ils nous recommandent</h2>
         <p className="mt-1 text-slate-600">Parents et élèves satisfaits.</p>
 
-        <div className="mt-6 grid gap-6 md:grid-cols-3">
-          {[
-            {
-              quote: "Super expérience ! Ma fille a repris confiance en maths en 1 mois.",
-              name: "Sophie, Paris",
-            },
-            {
-              quote: "Prof pédagogue et disponible. Les progrès sont visbles rapidement.",
-              name: "Rachid, Paris",
-            },
-            {
-              quote: "Plateforme simple et efficace. J'ai trouvé un super prof d'info.",
-              name: "Camille, Lille",
-            },
-          ].map((t) => (
-            <figure
-              key={t.name}
-              className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm"
-            >
-              <blockquote className="text-slate-800">"{t.quote}"</blockquote>
-              <figcaption className="mt-3 text-sm text-slate-500">- {t.name}</figcaption>
-            </figure>
-          ))}
+        <div className="mt-6">
+          <TestimonialsCarousel />
         </div>
       </section>
 
