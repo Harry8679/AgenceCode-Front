@@ -11,6 +11,7 @@ import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import { AuthProvider } from "./context/AuthContext";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
           {/* Fallback 404 simple (optionnel) */}
           <Route path="*" element={<div style={{ padding: 24 }}>Page introuvable</div>} />
         </Routes>
+        <Footer />
       </Router>
     </AuthProvider>
   );
