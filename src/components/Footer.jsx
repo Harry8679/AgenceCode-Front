@@ -55,7 +55,7 @@ export default function Footer() {
             <div className="md:col-span-3">
               {/* Logo “façon carré jaune” */}
               <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-md bg-[#FFD335] text-xl font-extrabold text-slate-900">
-                A
+                AC
               </div>
 
               <div className="space-y-3 text-sm">
