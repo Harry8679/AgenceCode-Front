@@ -434,7 +434,7 @@ const Home = () => {
 
 
       {/* ========== COMMENT ÇA MARCHE ========== */}
-      <section className="bg-white">
+      {/* <section className="bg-white">
         <div className="mx-auto max-w-7xl px-4 py-14">
           <h2 className="text-2xl font-bold text-slate-900">Comment ça marche ?</h2>
           <p className="mt-1 text-slate-600">3 étapes rapides pour démarrer.</p>
@@ -470,7 +470,7 @@ const Home = () => {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* ========== TÉMOIGNAGES ========== */}
       <section className="mx-auto max-w-7xl px-4 py-14">
