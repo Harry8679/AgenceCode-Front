@@ -150,39 +150,6 @@ export default function Footer() {
               </div>
             </div>
           </div>
-
-          {/* Bandeau bas */}
-          <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-6 md:flex-row md:items-center">
-            {/* gauche : copyright + trustpilot-like */}
-            <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-6">
-              <p className="text-xs text-slate-400">
-                © {new Date().getFullYear()} Acadex — Soutien scolaire
-              </p>
-
-              {/* badge “Trustpilot” style */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-300">Excellent</span>
-                <div className="flex items-center gap-1 rounded bg-emerald-500 px-1.5 py-0.5 text-white">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <svg key={i} viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor">
-                      <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                    </svg>
-                  ))}
-                </div>
-                <a href="#" className="text-xs underline underline-offset-2 hover:text-white">
-                  3 609 avis sur Trustpilot
-                </a>
-              </div>
-            </div>
-
-            {/* droite : liens légaux */}
-            <nav className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-slate-300">
-              <Link to="/donnees-personnelles" className="hover:text-white">Données personnelles</Link>
-              <Link to="/cookies" className="hover:text-white">Cookies</Link>
-              <Link to="/mentions-legales" className="hover:text-white">Mentions légales</Link>
-              <Link to="/cgs" className="hover:text-white">CGS</Link>
-            </nav>
-          </div>
         </div>
       </div>
     </footer>
