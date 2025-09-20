@@ -19,6 +19,7 @@ const Register = () => {
     firstName: "",
     lastName: "",
     email: "",
+    profile: "", // PARENT | STUDENT | TEACHER
     password: "",
     confirm: "",
   });
@@ -27,9 +28,9 @@ const Register = () => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
   const validate = () => {
-    const { firstName, lastName, email, password, confirm } = form;
-    if (!firstName || !lastName || !email || !password || !confirm) {
-      toast.error("Veuillez remplir tous les champs.");
+    const { firstName, lastName, email, profile, password, confirm } = form;
+    if (!firstName || !lastName || !email || !password || !confirm || !profile) {
+      toast.error("Veuillez remplir tous les champs (profil inclus).");
       return false;
     }
     if (firstName.trim().length < 2 || lastName.trim().length < 2) {
@@ -66,6 +67,7 @@ const Register = () => {
           lastName: form.lastName.trim(),
           email: form.email.trim(),
           password: form.password,
+          profile: form.profile, // ← envoyé au backend
         }),
       });
 
@@ -74,13 +76,8 @@ const Register = () => {
         ? await res.json()
         : { message: await res.text() };
 
-      if (!res.ok) {
-        throw new Error(data.message || "Erreur lors de l'inscription");
-      }
-
-      if (!data?.token) {
-        throw new Error("Réponse serveur invalide (token manquant).");
-      }
+      if (!res.ok) throw new Error(data.message || "Erreur lors de l'inscription");
+      if (!data?.token) throw new Error("Réponse serveur invalide (token manquant).");
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data));
@@ -96,26 +93,26 @@ const Register = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4 py-10 bg-gradient-to-b from-blue-50 to-white">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-blue-50 to-white px-4 py-10">
       <ToastContainer />
       <div className="grid w-full max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
         {/* Colonne gauche (accroche) */}
-        <div className="flex-col justify-center hidden p-8 bg-white border border-blue-100 shadow-lg md:flex rounded-2xl">
+        <div className="hidden flex-col justify-center rounded-2xl border border-blue-100 bg-white p-8 shadow-lg md:flex">
           <h1 className="mb-4 text-3xl font-bold text-blue-900">Créez votre compte</h1>
-          <p className="leading-relaxed text-gray-600">
-            Suivez vos revenus et dépenses facilement. Vos données restent
-            sécurisées et accessibles à tout moment.
+          <p className="text-gray-600 leading-relaxed">
+            Accédez à votre espace pour gérer vos cours, suivi et factures. Vos données
+            restent sécurisées et accessibles à tout moment.
           </p>
           <ul className="mt-6 space-y-2 text-sm text-gray-600">
-            <li>• Statistiques en un coup d’œil</li>
-            <li>• Catégorisation intelligente</li>
-            <li>• Export et historique</li>
+            <li>• Suivi des progrès</li>
+            <li>• Messagerie sécurisée</li>
+            <li>• Paiement simple et rapide</li>
           </ul>
         </div>
 
         {/* Colonne droite (formulaire en 1 colonne) */}
-        <div className="p-8 bg-white border border-gray-100 shadow-lg rounded-2xl">
-          <h2 className="mb-6 text-2xl font-bold text-center text-blue-700">Inscription</h2>
+        <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-lg">
+          <h2 className="mb-6 text-center text-2xl font-bold text-blue-700">Inscription</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             {/* Prénom */}
@@ -131,7 +128,7 @@ const Register = () => {
                 onChange={handleChange}
                 placeholder="Votre prénom"
                 autoComplete="given-name"
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
               />
             </div>
 
@@ -148,7 +145,7 @@ const Register = () => {
                 onChange={handleChange}
                 placeholder="Votre nom"
                 autoComplete="family-name"
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
               />
             </div>
 
@@ -165,8 +162,42 @@ const Register = () => {
                 onChange={handleChange}
                 placeholder="vous@example.com"
                 autoComplete="email"
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
               />
+            </div>
+
+            {/* Profil */}
+            <div>
+              <span className="block text-sm font-medium text-gray-700">Je suis</span>
+              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                {[
+                  { value: "PARENT", label: "Parent" },
+                  { value: "STUDENT", label: "Élève / Étudiant" },
+                  { value: "TEACHER", label: "Professeur" },
+                ].map((opt) => (
+                  <label
+                    key={opt.value}
+                    className={`flex cursor-pointer items-center justify-between rounded-lg border px-3 py-2 text-sm ${
+                      form.profile === opt.value
+                        ? "border-blue-400 bg-blue-50 text-blue-700"
+                        : "border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    <span>{opt.label}</span>
+                    <input
+                      type="radio"
+                      name="profile"
+                      value={opt.value}
+                      checked={form.profile === opt.value}
+                      onChange={handleChange}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                    />
+                  </label>
+                ))}
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                Ce choix nous permet d’adapter votre espace dès la création du compte.
+              </p>
             </div>
 
             {/* Mot de passe */}
@@ -183,12 +214,12 @@ const Register = () => {
                   onChange={handleChange}
                   placeholder="Au moins 6 caractères"
                   autoComplete="new-password"
-                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPwd((s) => !s)}
-                  className="absolute text-sm text-gray-500 -translate-y-1/2 right-3 top-1/2 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-gray-700"
                   aria-label="Afficher/masquer le mot de passe"
                 >
                   {showPwd ? "🙈" : "👁️"}
@@ -210,12 +241,12 @@ const Register = () => {
                   onChange={handleChange}
                   placeholder="Retapez le mot de passe"
                   autoComplete="new-password"
-                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPwd2((s) => !s)}
-                  className="absolute text-sm text-gray-500 -translate-y-1/2 right-3 top-1/2 hover:text-gray-700"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 hover:text-gray-700"
                   aria-label="Afficher/masquer la confirmation"
                 >
                   {showPwd2 ? "🙈" : "👁️"}
@@ -232,7 +263,7 @@ const Register = () => {
               {loading ? "Création du compte..." : "S'inscrire"}
             </button>
 
-            <p className="text-sm text-center text-gray-600">
+            <p className="text-center text-sm text-gray-600">
               Déjà un compte ?{" "}
               <Link to="/connexion" className="text-blue-600 hover:underline">
                 Se connecter
