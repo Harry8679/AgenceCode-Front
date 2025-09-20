@@ -482,13 +482,13 @@ const Home = () => {
         </div>
       </section>
 
-      <TeacherVideosGrid
+      {/* <TeacherVideosGrid
         videos={[
           { id: "LjRmzhvIIY8", title: "Cours : Dérivées en Terminale" },
           { id: "-GmIs6Cekhk", title: "Méthode : Résolution d'équations" },
           { id: "n5DEuSKj4A8", title: "Algorithmes : bases en Python" },
         ]}
-      />
+      /> */}
 
       <TeacherVideosCarousel
         videos={[
