@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from "../context/AuthContext"; // CHANGEMENT 1: On utilise votre hook useAuth
 
 const cn = (...a) => {
     return a.filter(Boolean).join(' ');
@@ -7,6 +8,10 @@ const cn = (...a) => {
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  
+  // CHANGEMENT 2: On récupère "user" au lieu de "token"
+  const { user, logout } = useAuth(); 
+  const navigate = useNavigate();
 
   const linkBase = "block px-3 py-2 rounded-lg text-sm font-medium transition";
   const linkIdle = "text-gray-600 hover:text-gray-900 hover:bg-gray-100";
@@ -17,7 +22,13 @@ const Navbar = () => {
     { to: '/cours-particuliers', label: 'Cours particuliers' },
     { to: '/donner-des-cours', label: 'Donner des cours' },
     { to: '/stage-intensifs', label: 'Stage Intensifs' },
-  ]
+  ];
+
+  const handleLogout = () => {
+    logout();
+    setOpen(false);
+    navigate('/connexion');
+  };
 
   return (
     <header className='sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100'>
@@ -31,7 +42,7 @@ const Navbar = () => {
                     <span className='text-lg font-semibold text-gray-900'>Agence Code</span>
                 </Link>
 
-                {/* Ddesktop nav */}
+                {/* Desktop nav */}
                 <nav className='hidden md:flex items-center gap-2'>
                     {navItems.map((item) => (
                         <NavLink key={item.to} to={item.to} className={({ isActive }) => cn(linkBase, isActive ? linkActive : linkIdle)}>
@@ -40,14 +51,28 @@ const Navbar = () => {
                     ))}
                 </nav>
 
-                {/* Actions */}
+                {/* Actions Desktop */}
                 <div className='hidden md:flex items-center gap-2'>
-                    <Link to='/connexion' className='px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50'>
-                        Se connecter
-                    </Link>
-                    <Link to='/inscription' className='px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700'>
-                        Créer un compte
-                    </Link>
+                    {/* CHANGEMENT 3: On vérifie l'existence de "user" */}
+                    {user ? (
+                        <>
+                            <Link to='/profil' className='px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50'>
+                                Voir mon profil
+                            </Link>
+                            <button onClick={handleLogout} className='px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700'>
+                                Déconnexion
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <Link to='/connexion' className='px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50'>
+                                Se connecter
+                            </Link>
+                            <Link to='/inscription' className='px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700'>
+                                Créer un compte
+                            </Link>
+                        </>
+                    )}
                 </div>
 
                 {/* Burger Mobile */}
@@ -66,18 +91,33 @@ const Navbar = () => {
                 <div className='md:hidden pb-4'>
                     <nav className='flex flex-col gap-1'>
                         {navItems.map((item) => (
-                            <NavLink key={item.to} to={item.to} onClick={() => setOpen(false)} className={({ isActive }) => cn(linkBase, isActive ? linkActive : linkActive)} end>
+                            <NavLink key={item.to} to={item.to} onClick={() => setOpen(false)} className={({ isActive }) => cn(linkBase, isActive ? linkActive : linkIdle)} end>
                                 {item.label}
                             </NavLink>
                         ))}
                     </nav>
+                    {/* Actions Mobile */}
                     <div className='mt-3 flex flex-col gap-2'>
-                        <Link to='/connexion' onClick={() => setOpen(false)} className='w-full px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 text-center hover:bg-gray-50'>
-                            Se connecter
-                        </Link>
-                        <Link to='/inscription' onClick={() => setOpen(false)} className='w-full px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium text-center hover:bg-indigo-700'>
-                            Créer un compte
-                        </Link>
+                        {/* CHANGEMENT 3 (bis): On vérifie aussi "user" ici */}
+                        {user ? (
+                            <>
+                                <Link to='/profil' onClick={() => setOpen(false)} className='w-full px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 text-center hover:bg-gray-50'>
+                                    Voir mon profil
+                                </Link>
+                                <button onClick={handleLogout} className='w-full px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-medium text-center hover:bg-red-700'>
+                                    Déconnexion
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link to='/connexion' onClick={() => setOpen(false)} className='w-full px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 text-center hover:bg-gray-50'>
+                                    Se connecter
+                                </Link>
+                                <Link to='/inscription' onClick={() => setOpen(false)} className='w-full px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium text-center hover:bg-indigo-700'>
+                                    Créer un compte
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             )}
