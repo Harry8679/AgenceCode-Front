@@ -53,44 +53,81 @@ const Register = () => {
     return true;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
+  // dans le composant
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validate()) return;
 
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE}/api/v1/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firstName: form.firstName.trim(),
-          lastName: form.lastName.trim(),
-          email: form.email.trim(),
-          password: form.password,
-          profile: form.profile, // ← envoyé au backend
-        }),
-      });
+  setLoading(true);
+  try {
+    // 1) Inscription
+    const payload = {
+      firstName: form.firstName.trim(),
+      lastName: form.lastName.trim(),
+      email: form.email.trim().toLowerCase(),
+      password: form.password,
+      profile: (form.profile || "").toUpperCase(), // ← important pour l’enum PHP
+    };
 
-      const contentType = res.headers.get("content-type") || "";
-      const data = contentType.includes("application/json")
-        ? await res.json()
-        : { message: await res.text() };
+    const res = await fetch(`${API_BASE}/api/v1/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-      if (!res.ok) throw new Error(data.message || "Erreur lors de l'inscription");
-      if (!data?.token) throw new Error("Réponse serveur invalide (token manquant).");
+    const contentType = res.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+      ? await res.json()
+      : { message: await res.text() };
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data));
-      authLogin?.(data);
-
-      toast.success("Inscription réussie !");
-      navigate("/dashboard");
-    } catch (err) {
-      toast.error(err.message || "Erreur serveur");
-    } finally {
-      setLoading(false);
+    // Gestion erreurs back (validation, email déjà pris, etc.)
+    if (!res.ok) {
+      // si tu renvoies des violations depuis Symfony Validator
+      if (data?.violations?.length) {
+        data.violations.forEach(v => toast.error(`${v.propertyPath}: ${v.title || v.message}`));
+      } else {
+        toast.error(data.message || "Erreur lors de l'inscription");
+      }
+      return;
     }
-  };
+
+    // 2) On veut un token + un user pour hydrater le contexte
+    if (!data?.token) {
+      throw new Error("Réponse serveur invalide (token manquant)");
+    }
+    const token = data.token;
+
+    // si le back renvoie déjà le user dans la même réponse on l’utilise,
+    // sinon on appelle /me
+    let user = data.id ? data : null;
+
+    if (!user) {
+      try {
+        const meRes = await fetch(`${API_BASE}/api/v1/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const me = await meRes.json();
+        if (meRes.ok && me?.id) user = me;
+      } catch {
+        // pas bloquant
+      }
+    }
+
+    // 3) Stockage + contexte + redirect
+    const toStore = user ? { ...user, token } : { token, email: payload.email, profile: payload.profile };
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(toStore));
+    authLogin?.(toStore);
+
+    toast.success("Inscription réussie !");
+    navigate("/dashboard");
+  } catch (err) {
+    toast.error(err.message || "Erreur serveur");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-blue-50 to-white px-4 py-10">

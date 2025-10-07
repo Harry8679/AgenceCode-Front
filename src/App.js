@@ -13,6 +13,11 @@ import PublicRoute from "./components/PublicRoute";
 import { AuthProvider } from "./context/AuthContext";
 import Footer from "./components/Footer";
 
+console.log("ProtectedRoute:", ProtectedRoute);
+console.log("PublicRoute:", PublicRoute);
+console.log("AuthProvider:", AuthProvider);
+
+
 function App() {
   return (
     <AuthProvider>
