@@ -1,0 +1,32 @@
+// src/dashboard/components/Sidebar.js
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+
+const Sidebar = ({ links }) => {
+  const linkBase = "flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors";
+  const linkIdle = "text-gray-600 hover:bg-gray-200";
+  const linkActive = "bg-indigo-100 text-indigo-700";
+
+  return (
+    <aside className="w-64 bg-white border-r border-gray-200 flex-shrink-0 hidden md:block">
+      <div className="p-4">
+        <h2 className="text-lg font-semibold text-gray-800">Menu</h2>
+        <nav className="mt-6 space-y-2">
+          {links.map((link, index) => (
+            <NavLink
+              key={index}
+              to={link.to}
+              end // 'end' est important pour que le lien "Accueil" ne soit pas actif tout le temps
+              className={({ isActive }) => `${linkBase} ${isActive ? linkActive : linkIdle}`}
+            >
+              {/* Vous pouvez ajouter des icônes ici si vous le souhaitez */}
+              <span>{link.label}</span>
+            </NavLink>
+          ))}
+        </nav>
+      </div>
+    </aside>
+  );
+};
+
+export default Sidebar;
