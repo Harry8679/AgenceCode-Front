@@ -60,17 +60,18 @@ const Login = () => {
       if (!res.ok) throw new Error(data.message || "Erreur de connexion");
       if (!data?.token) throw new Error("Réponse serveur invalide (token manquant).");
 
-      // --- Normalise l'objet utilisateur ---
-      const normalizedUser = data.user ?? data; // doit contenir { profile: 'TEACHER' | 'PARENT' | 'STUDENT', ... }
+      // ✅ Normalisation : fusionne token + infos user
+      const normalizedUser = {
+        token: data.token,
+        ...(data.user || {}), // profile, email, id, etc.
+      };
 
-      // Stockage
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(normalizedUser));
-      authLogin?.(normalizedUser); // ✅ passe l'objet utilisateur (pas `data`)
+      // Stockage centralisé via AuthContext
+      authLogin?.(normalizedUser);
 
       toast.success("Connexion réussie !");
 
-      // Redirection selon profil
+      // ✅ Redirection selon le profil
       const profile = (normalizedUser.profile || normalizedUser.profileType || "").toUpperCase();
       switch (profile) {
         case "TEACHER":
