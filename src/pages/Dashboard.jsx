@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { TeacherRoutes } from "../dashboard/teacher/TeacherDashboard";
@@ -9,13 +8,20 @@ const DashboardRoutes = () => {
   const { user } = useAuth();
   if (!user) return null;
 
-  const profile = (user.profile || user.profileType || "").toUpperCase();
+  // lecture tolérante (quelle que soit la forme)
+  const profile = (
+    user?.profileType ??
+    user?.profile ??
+    user?.role ??
+    user?.user?.profile ?? // au cas où tu aurais un user imbriqué
+    user?.data?.profile ??
+    ""
+  ).toString().toUpperCase();
 
   return (
     <Routes>
       {profile === "TEACHER" && (
         <>
-          {/* redirection vers l'accueil enseignant */}
           <Route index element={<Navigate to="mes-eleves" replace />} />
           {TeacherRoutes}
         </>
