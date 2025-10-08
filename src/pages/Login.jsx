@@ -6,6 +6,22 @@ import { useAuth } from "../context/AuthContext";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || "";
 
+// Convertit n'importe quelle valeur de rôle/profil en TEACHER/PARENT/STUDENT
+const normalizeProfile = (raw) => {
+  if (!raw) return "";
+  let s = String(raw).toUpperCase().trim();
+
+  // Ex: ROLE_TEACHER -> TEACHER
+  if (s.startsWith("ROLE_")) s = s.slice(5);
+
+  // Quelques alias fréquents
+  if (["TEACHER", "ENSEIGNANT", "PROFESSEUR"].includes(s)) return "TEACHER";
+  if (["PARENT", "PARENTS", "TUTEUR"].includes(s)) return "PARENT";
+  if (["STUDENT", "ELEVE", "ÉLÈVE"].includes(s)) return "STUDENT";
+
+  return ["TEACHER", "PARENT", "STUDENT"].includes(s) ? s : "";
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
@@ -58,21 +74,42 @@ const Login = () => {
         : { message: await res.text() };
 
       if (!res.ok) throw new Error(data.message || "Erreur de connexion");
-      if (!data?.token) throw new Error("Réponse serveur invalide (token manquant).");
 
-      // ✅ Normalisation : fusionne token + infos user
+      // Récup token (peu importe le nom de la propriété)
+      const token =
+        data.token || data.access_token || data.jwt || data.id_token || "";
+
+      if (!token) throw new Error("Réponse serveur invalide (token manquant).");
+
+      // Cherche le profil dans toutes les formes possibles
+      const rawProfileCandidates = [
+        data.user?.profile,
+        data.user?.profileType,
+        data.user?.role,
+        Array.isArray(data.user?.roles) ? data.user.roles[0] : undefined,
+        data.profile,
+        data.profileType,
+        data.role,
+        Array.isArray(data.roles) ? data.roles[0] : undefined,
+        data.user?.type,
+        data.type,
+      ];
+      const firstFound = rawProfileCandidates.find(Boolean);
+      const profile = normalizeProfile(firstFound);
+
+      // 👇 Normalise l'objet utilisateur que tu stockes dans le contexte
       const normalizedUser = {
-        token: data.token,
-        ...(data.user || {}), // profile, email, id, etc.
+        token,
+        ...((data.user && typeof data.user === "object") ? data.user : {}),
+        profile, // on force un champ `profile` standardisé
       };
 
-      // Stockage centralisé via AuthContext
+      // Sauvegarde via ton AuthContext (gère aussi localStorage)
       authLogin?.(normalizedUser);
 
       toast.success("Connexion réussie !");
 
-      // ✅ Redirection selon le profil
-      const profile = (normalizedUser.profile || normalizedUser.profileType || "").toUpperCase();
+      // Redirection selon profil
       switch (profile) {
         case "TEACHER":
           navigate("/dashboard/mes-eleves");
@@ -84,7 +121,7 @@ const Login = () => {
           navigate("/dashboard/accueil-eleve");
           break;
         default:
-          navigate("/dashboard");
+          navigate("/dashboard"); // fallback
       }
     } catch (err) {
       toast.error(err.message || "Erreur serveur");
@@ -96,6 +133,8 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center min-h-screen px-4 py-10 bg-gradient-to-b from-blue-50 to-white">
       <ToastContainer />
+      {/* ... garde le reste de ton JSX identique ... */}
+      {/* formulaire, inputs, etc. */}
       <div className="grid w-full max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
         {/* Colonne gauche */}
         <div className="flex-col justify-center hidden p-8 bg-white border border-blue-100 shadow-lg md:flex rounded-2xl">
@@ -113,7 +152,6 @@ const Login = () => {
         {/* Colonne droite */}
         <div className="p-8 bg-white border border-gray-100 shadow-lg rounded-2xl">
           <h2 className="mb-6 text-2xl font-bold text-center text-blue-700">Connexion</h2>
-
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             {/* Email */}
             <div>
