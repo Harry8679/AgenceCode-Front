@@ -30,8 +30,11 @@ const DashboardRoutes = () => {
   // Attendre que l'utilisateur soit chargé pour éviter un rendu incorrect
   if (!user) return null;
 
+  // Récupération robuste du profil (indifférent à la casse)
+  const profile = (user.profile || user.profileType || '').toUpperCase();
+
   // Afficher les routes correspondant au profil de l'utilisateur
-  switch (user.profileType) {
+  switch (profile) {
     case 'TEACHER':
       return <TeacherRoutes />;
     // case 'PARENT':
