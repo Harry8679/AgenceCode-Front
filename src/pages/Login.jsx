@@ -62,73 +62,68 @@ const Login = () => {
       const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: form.email.trim(),
-          password: form.password,
-        }),
+        body: JSON.stringify({ email: form.email.trim(), password: form.password }),
       });
 
-      const contentType = res.headers.get("content-type") || "";
-      const data = contentType.includes("application/json")
-        ? await res.json()
-        : { message: await res.text() };
-
+      const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Erreur de connexion");
 
-      // Récup token (peu importe le nom de la propriété)
-      const token =
-        data.token || data.access_token || data.jwt || data.id_token || "";
+      // ====================================================================
+      // 👇 DÉBUT DE LA LOGIQUE CORRIGÉE ET FIABILISÉE
+      // ====================================================================
 
-      if (!token) throw new Error("Réponse serveur invalide (token manquant).");
+      // ÉTAPE 1: Loggez la réponse de votre API pour voir sa structure
+      console.log("Réponse BRUTE de l'API:", data);
 
-      // Cherche le profil dans toutes les formes possibles
-      const rawProfileCandidates = [
-        data.user?.profile,
-        data.user?.profileType,
-        data.user?.role,
-        Array.isArray(data.user?.roles) ? data.user.roles[0] : undefined,
-        data.profile,
-        data.profileType,
-        data.role,
-        Array.isArray(data.roles) ? data.roles[0] : undefined,
-        data.user?.type,
-        data.type,
-      ];
-      const firstFound = rawProfileCandidates.find(Boolean);
-      const profile = normalizeProfile(firstFound);
+      // ÉTAPE 2: On cherche le profil dans toutes les propriétés possibles
+      const rawProfile =
+        data.profile ||
+        data.profileType ||
+        data.role ||
+        (Array.isArray(data.roles) && data.roles[0]) ||
+        data.user?.profile ||
+        data.user?.profileType ||
+        data.user?.role ||
+        (Array.isArray(data.user?.roles) && data.user.roles[0]);
 
-      // 👇 Normalise l'objet utilisateur que tu stockes dans le contexte
+      const profile = normalizeProfile(rawProfile);
+      
+      // Si aucun profil valide n'est trouvé, on lève une erreur claire.
+      if (!profile) {
+        throw new Error("Profil utilisateur non reconnu dans la réponse serveur.");
+      }
+
+      // ÉTAPE 3: On construit un objet utilisateur PROPRE et UNIQUE
       const normalizedUser = {
-        token,
-        ...((data.user && typeof data.user === "object") ? data.user : {}),
-        profile, // on force un champ `profile` standardisé
+        id: data.user?.id || data.id,
+        email: data.user?.email || data.email,
+        name: data.user?.name || data.name,
+        // On s'assure que le profil est TOUJOURS dans une propriété `profile`
+        profile: profile, 
+        token: data.token || data.access_token,
       };
 
-      // Sauvegarde via ton AuthContext (gère aussi localStorage)
-      authLogin?.(normalizedUser);
+      // ÉTAPE 4: Loggez l'objet que vous allez sauvegarder
+      console.log("Utilisateur NORMALISÉ sauvegardé:", normalizedUser);
 
-      toast.success("Connexion réussie !");
+      // Sauvegarde dans le contexte et localStorage
+      authLogin(normalizedUser);
 
-      // Redirection selon profil
-      switch (profile) {
-        case "TEACHER":
-          navigate("/dashboard/mes-eleves");
-          break;
-        case "PARENT":
-          navigate("/dashboard/accueil-parent");
-          break;
-        case "STUDENT":
-          navigate("/dashboard/accueil-eleve");
-          break;
-        default:
-          navigate("/dashboard"); // fallback
-      }
+      toast.success("Connexion réussie ! Redirection...");
+
+      // La redirection est un détail, le plus important est ce qui est stocké
+      setTimeout(() => navigate("/dashboard"), 1000);
+
+      // ====================================================================
+      // 👆 FIN DE LA LOGIQUE CORRIGÉE
+      // ====================================================================
+
     } catch (err) {
-      toast.error(err.message || "Erreur serveur");
+      toast.error(err.message || "Une erreur est survenue.");
     } finally {
       setLoading(false);
     }
-  };
+};
 
   return (
     <div className="flex items-center justify-center min-h-screen px-4 py-10 bg-gradient-to-b from-blue-50 to-white">
