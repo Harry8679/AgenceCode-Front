@@ -4,19 +4,29 @@ import { TeacherRoutes } from "../dashboard/teacher/TeacherDashboard";
 // import { ParentRoutes } from "../dashboard/parent/ParentDashboard";
 // import { StudentRoutes } from "../dashboard/student/StudentDashboard";
 
+const normalizeProfile = (raw) => {
+  if (!raw) return "";
+  let s = String(raw).toUpperCase().trim();
+  if (s.startsWith("ROLE_")) s = s.slice(5);
+  if (["TEACHER", "ENSEIGNANT", "PROFESSEUR"].includes(s)) return "TEACHER";
+  if (["PARENT", "PARENTS", "TUTEUR"].includes(s)) return "PARENT";
+  if (["STUDENT", "ELEVE", "ÉLÈVE"].includes(s)) return "STUDENT";
+  return ["TEACHER", "PARENT", "STUDENT"].includes(s) ? s : "";
+};
+
 const DashboardRoutes = () => {
   const { user } = useAuth();
   if (!user) return null;
 
-  // lecture tolérante (quelle que soit la forme)
-  const profile = (
-    user?.profileType ??
+  // Cherche le profile dans toutes les formes possibles (y compris anciennes)
+  const profile = normalizeProfile(
     user?.profile ??
+    user?.profileType ??
     user?.role ??
-    user?.user?.profile ?? // au cas où tu aurais un user imbriqué
-    user?.data?.profile ??
-    ""
-  ).toString().toUpperCase();
+    (Array.isArray(user?.roles) ? user.roles[0] : undefined) ??
+    user?.user?.profile ?? // si jamais tu avais stocké user.user
+    user?.data?.profile
+  );
 
   return (
     <Routes>
