@@ -3,9 +3,9 @@ import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Hooks et contexte
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
 
-// Composants de layout et de protection
+// Composants
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -16,30 +16,8 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 
-// Import des routes des dashboards
-import { TeacherRoutes } from "./dashboard/teacher/TeacherDashboard";
-// import { ParentRoutes } from "./dashboard/parent/ParentDashboard";
-// import { StudentRoutes } from "./dashboard/student/StudentDashboard";
-
-const DashboardRoutes = () => {
-  const { user } = useAuth();
-
-  if (!user) return null;
-
-  // récupération du profil avec fallback
-  const profile = (user.profile || user.profileType || "").toUpperCase();
-
-  switch (profile) {
-    case "TEACHER":
-      return <>{TeacherRoutes}</>;
-    // case "PARENT":
-    //   return <>{ParentRoutes}</>;
-    // case "STUDENT":
-    //   return <>{StudentRoutes}</>;
-    default:
-      return <div style={{ padding: 24 }}>Profil non valide : "{profile}"</div>;
-  }
-};
+// Dashboards
+import DashboardRoutes from "./pages/Dashboard";
 
 function App() {
   return (
@@ -58,9 +36,7 @@ function App() {
               path="/dashboard/*"
               element={
                 <ProtectedRoute>
-                  <Routes>
-                    {DashboardRoutes()}
-                  </Routes>
+                  <DashboardRoutes />   {/* 👉 composant, pas fonction */}
                 </ProtectedRoute>
               }
             />
