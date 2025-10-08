@@ -28,7 +28,7 @@ const DashboardRoutes = () => {
   const { user } = useAuth();
   
   // Attendre que l'utilisateur soit chargé pour éviter un rendu incorrect
-  if (!user) return null; 
+  if (!user) return null;
 
   // Afficher les routes correspondant au profil de l'utilisateur
   switch (user.profileType) {
