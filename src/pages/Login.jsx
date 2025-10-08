@@ -5,7 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from "../context/AuthContext";
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || ""; // proxy CRA ou .env
+const API_BASE = process.env.REACT_APP_API_BASE_URL || "";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -67,17 +67,34 @@ const Login = () => {
         throw new Error(data.message || "Erreur de connexion");
       }
 
-      // data attendu: { token, user: { ... } } (ou directement { token, ...profil })
       if (!data?.token) {
         throw new Error("Réponse serveur invalide (token manquant).");
       }
 
+      // stocke token et user
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user ?? data));
       authLogin?.(data);
 
       toast.success("Connexion réussie !");
-      navigate("/dashboard");
+
+      // 🔑 Récupère le profil et redirige
+      const profile = (data.user?.profile || data.user?.profileType || data.profile || "").toUpperCase();
+
+      switch (profile) {
+        case "TEACHER":
+          navigate("/dashboard/mes-eleves"); // ou autre page d’accueil enseignant
+          break;
+        case "PARENT":
+          navigate("/dashboard/accueil-parent");
+          break;
+        case "STUDENT":
+          navigate("/dashboard/accueil-eleve");
+          break;
+        default:
+          navigate("/dashboard"); // fallback
+          break;
+      }
     } catch (err) {
       toast.error(err.message || "Erreur serveur");
     } finally {
@@ -89,7 +106,7 @@ const Login = () => {
     <div className="flex items-center justify-center min-h-screen px-4 py-10 bg-gradient-to-b from-blue-50 to-white">
       <ToastContainer />
       <div className="grid w-full max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
-        {/* Colonne gauche (accroche) */}
+        {/* Colonne gauche */}
         <div className="flex-col justify-center hidden p-8 bg-white border border-blue-100 shadow-lg md:flex rounded-2xl">
           <h1 className="mb-4 text-3xl font-bold text-blue-900">Ravi de vous revoir 👋</h1>
           <p className="leading-relaxed text-gray-600">
@@ -102,7 +119,7 @@ const Login = () => {
           </ul>
         </div>
 
-        {/* Colonne droite (formulaire en 1 colonne) */}
+        {/* Colonne droite */}
         <div className="p-8 bg-white border border-gray-100 shadow-lg rounded-2xl">
           <h2 className="mb-6 text-2xl font-bold text-center text-blue-700">Connexion</h2>
 
