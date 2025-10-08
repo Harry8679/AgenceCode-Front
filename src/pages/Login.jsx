@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
@@ -13,12 +12,7 @@ const Login = () => {
 
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
-
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-    remember: true,
-  });
+  const [form, setForm] = useState({ email: "", password: "", remember: true });
 
   const handleChange = (e) => {
     const { name, type, checked, value } = e.target;
@@ -63,27 +57,24 @@ const Login = () => {
         ? await res.json()
         : { message: await res.text() };
 
-      if (!res.ok) {
-        throw new Error(data.message || "Erreur de connexion");
-      }
+      if (!res.ok) throw new Error(data.message || "Erreur de connexion");
+      if (!data?.token) throw new Error("Réponse serveur invalide (token manquant).");
 
-      if (!data?.token) {
-        throw new Error("Réponse serveur invalide (token manquant).");
-      }
+      // --- Normalise l'objet utilisateur ---
+      const normalizedUser = data.user ?? data; // doit contenir { profile: 'TEACHER' | 'PARENT' | 'STUDENT', ... }
 
-      // stocke token et user
+      // Stockage
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user ?? data));
-      authLogin?.(data);
+      localStorage.setItem("user", JSON.stringify(normalizedUser));
+      authLogin?.(normalizedUser); // ✅ passe l'objet utilisateur (pas `data`)
 
       toast.success("Connexion réussie !");
 
-      // 🔑 Récupère le profil et redirige
-      const profile = (data.user?.profile || data.user?.profileType || data.profile || "").toUpperCase();
-
+      // Redirection selon profil
+      const profile = (normalizedUser.profile || normalizedUser.profileType || "").toUpperCase();
       switch (profile) {
         case "TEACHER":
-          navigate("/dashboard/mes-eleves"); // ou autre page d’accueil enseignant
+          navigate("/dashboard/mes-eleves");
           break;
         case "PARENT":
           navigate("/dashboard/accueil-parent");
@@ -92,8 +83,7 @@ const Login = () => {
           navigate("/dashboard/accueil-eleve");
           break;
         default:
-          navigate("/dashboard"); // fallback
-          break;
+          navigate("/dashboard");
       }
     } catch (err) {
       toast.error(err.message || "Erreur serveur");
