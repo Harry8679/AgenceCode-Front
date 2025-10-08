@@ -1,5 +1,5 @@
 // src/pages/Dashboard.jsx
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { TeacherRoutes } from "../dashboard/teacher/TeacherDashboard";
 // import { ParentRoutes } from "../dashboard/parent/ParentDashboard";
@@ -13,9 +13,28 @@ const DashboardRoutes = () => {
 
   return (
     <Routes>
-      {profile === "TEACHER" && TeacherRoutes}
-      {/* {profile === "PARENT" && ParentRoutes} */}
-      {/* {profile === "STUDENT" && StudentRoutes} */}
+      {profile === "TEACHER" && (
+        <>
+          {/* redirection vers l'accueil enseignant */}
+          <Route index element={<Navigate to="mes-eleves" replace />} />
+          {TeacherRoutes}
+        </>
+      )}
+
+      {profile === "PARENT" && (
+        <>
+          <Route index element={<Navigate to="accueil-parent" replace />} />
+          {/* {ParentRoutes} */}
+        </>
+      )}
+
+      {profile === "STUDENT" && (
+        <>
+          <Route index element={<Navigate to="accueil-eleve" replace />} />
+          {/* {StudentRoutes} */}
+        </>
+      )}
+
       <Route
         path="*"
         element={<div style={{ padding: 24 }}>Profil non valide : "{profile}"</div>}
