@@ -1,5 +1,3 @@
-// src/dashboard/components/DashboardLayout.js
-import React from 'react';
 import Sidebar from './Sidebar';
 
 // Le layout reçoit les liens pour la sidebar et le contenu à afficher (children)
