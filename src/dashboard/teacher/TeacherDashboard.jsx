@@ -1,4 +1,3 @@
-import React from "react";
 import { Route, Outlet } from "react-router-dom";
 import DashboardLayout from "../components/DashboardLayout";
 
