@@ -8,7 +8,7 @@ import { NavLink } from "react-router-dom";
 const PROFILE_STYLES = {
   STUDENT: {
     wrapper: "bg-gradient-to-b from-sky-50 via-white to-white",
-    border: "border-sky-100",
+    border: "border-sky-400",
     title: "text-sky-800",
     idle: "text-sky-700/80 hover:bg-sky-50",
     active: "bg-sky-100 text-sky-800",

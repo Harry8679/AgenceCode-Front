@@ -21,7 +21,7 @@ const PROFILE_THEME = {
   STUDENT: {
     // fond doux “pédago”
     bg: "bg-gradient-to-b from-sky-50 via-white to-white",
-    ring: "ring-sky-100",
+    ring: "ring-sky-400",
   },
   PARENT: {
     bg: "bg-gradient-to-b from-emerald-50 via-white to-white",
