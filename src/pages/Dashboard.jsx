@@ -19,23 +19,27 @@ const normalize = (raw) => {
 /* ---------- Thèmes par profil ---------- */
 const PROFILE_THEME = {
   STUDENT: {
-    // fond doux “pédago”
-    bg: "bg-gradient-to-b from-sky-50 via-white to-white",
-    ring: "ring-sky-400",
+    bg: "bg-gradient-to-br from-sky-200 via-sky-100 to-white",
+    ring: "ring-sky-300",
+    panel: "bg-white/95", // carte intérieure légèrement teintée
   },
   PARENT: {
-    bg: "bg-gradient-to-b from-emerald-50 via-white to-white",
-    ring: "ring-emerald-100",
+    bg: "bg-gradient-to-br from-emerald-200 via-emerald-100 to-white",
+    ring: "ring-emerald-300",
+    panel: "bg-white/95",
   },
   TEACHER: {
-    bg: "bg-gradient-to-b from-amber-50 via-white to-white",
-    ring: "ring-amber-100",
+    bg: "bg-gradient-to-br from-amber-200 via-amber-100 to-white",
+    ring: "ring-amber-300",
+    panel: "bg-white/95",
   },
   DEFAULT: {
-    bg: "bg-gray-50",
-    ring: "ring-gray-100",
+    bg: "bg-gradient-to-br from-gray-100 via-gray-50 to-white",
+    ring: "ring-gray-200",
+    panel: "bg-white",
   },
 };
+
 
 const DashboardRoutes = () => {
   const { user } = useAuth();
