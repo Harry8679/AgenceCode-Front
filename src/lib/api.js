@@ -1,39 +1,41 @@
-// Simple fetch wrapper for API Platform + JWT
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "";
+const API_BASE = process.env.REACT_APP_API_BASE_URL || ""; // ex: http://localhost:8000
 
-export async function apiFetch(path, {
-  method = "GET",
-  token,
-  body,
-  contentType = "application/ld+json", // for POST/PUT
-  accept = "application/ld+json",
-  headers = {},
-} = {}) {
-  const h = {
-    Accept: accept,
-    ...headers,
-  };
-  if (token) h.Authorization = `Bearer ${token}`;
-  if (body !== undefined) {
-    h["Content-Type"] = contentType;
-    if (contentType === "application/merge-patch+json") {
-      // Let you pass plain object for PATCH too
-      body = JSON.stringify(body);
-    } else if (contentType.includes("json")) {
-      body = JSON.stringify(body);
-    }
-  }
+export function getToken() {
+  return localStorage.getItem("token") || JSON.parse(localStorage.getItem("user") || "{}")?.token || "";
+}
 
-  const res = await fetch(`${API_BASE}${path}`, { method, headers: h, body });
+export function decodeJwt(token) {
+  try {
+    const [, payload] = token.split(".");
+    return JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+  } catch { return null; }
+}
+
+export async function apiFetch(path, options = {}) {
+  const token = getToken();
+  const headers = new Headers(options.headers || {});
+  if (!headers.has("Accept")) headers.set("Accept", "application/ld+json");
+  if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+
+  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
   const ct = res.headers.get("content-type") || "";
-  const data = ct.includes("json") ? await res.json() : await res.text();
+  const body = ct.includes("json") ? await res.json() : await res.text();
 
   if (!res.ok) {
-    const message =
-      (data?.["hydra:description"]) ||
-      (data?.detail) ||
-      (typeof data === "string" ? data : "Erreur API");
-    throw new Error(message);
+    const msg = (body && (body.detail || body.message)) || `${res.status} ${res.statusText}`;
+    const err = new Error(msg);
+    err.status = res.status;
+    err.body = body;
+    throw err;
   }
-  return data;
+  return body;
+}
+
+/** Normalise la collection API Platform v3 (member) / v2 (hydra:member) */
+export function parseCollection(data) {
+  if (Array.isArray(data?.member)) return data.member;
+  if (Array.isArray(data?.["hydra:member"])) return data["hydra:member"];
+  if (Array.isArray(data)) return data;
+  return [];
 }
