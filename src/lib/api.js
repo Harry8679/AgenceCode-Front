@@ -1,41 +1,72 @@
-const API_BASE = process.env.REACT_APP_API_BASE_URL || ""; // ex: http://localhost:8000
+// src/lib/api.js
+const API_BASE = process.env.REACT_APP_API_BASE_URL || "";
 
 export function getToken() {
-  return localStorage.getItem("token") || JSON.parse(localStorage.getItem("user") || "{}")?.token || "";
+  return localStorage.getItem("token");
 }
 
 export function decodeJwt(token) {
   try {
+    if (!token) return null;
     const [, payload] = token.split(".");
-    return JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+    return JSON.parse(atob(payload));
   } catch { return null; }
 }
 
-export async function apiFetch(path, options = {}) {
-  const token = getToken();
-  const headers = new Headers(options.headers || {});
-  if (!headers.has("Accept")) headers.set("Accept", "application/ld+json");
-  if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
-  if (token) headers.set("Authorization", `Bearer ${token}`);
+export async function apiFetch(path, {
+  method = "GET",
+  token = getToken(),
+  body,
+  contentType,        // <-- permet de forcer un type si besoin (PATCH)
+  headers = {},
+} = {}) {
+  const h = {
+    Accept: "application/ld+json",
+    ...headers,
+  };
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  if (token) h.Authorization = `Bearer ${token}`;
+
+  // S'il y a un body, on met un Content-Type par défaut adapté à API Platform
+  if (body !== undefined && !h["Content-Type"]) {
+    h["Content-Type"] = contentType
+      ? contentType
+      : (method === "PATCH" ? "application/merge-patch+json" : "application/ld+json");
+  }
+
+  const init = {
+    method,
+    headers: h,
+  };
+
+  if (body !== undefined) {
+    init.body = (typeof body === "string") ? body : JSON.stringify(body);
+  }
+
+  const res = await fetch(`${API_BASE}${path}`, init);
+
   const ct = res.headers.get("content-type") || "";
-  const body = ct.includes("json") ? await res.json() : await res.text();
+  const parse = ct.includes("json")
+    ? () => res.json()
+    : () => res.text();
 
   if (!res.ok) {
-    const msg = (body && (body.detail || body.message)) || `${res.status} ${res.statusText}`;
-    const err = new Error(msg);
-    err.status = res.status;
-    err.body = body;
-    throw err;
+    let err;
+    try { err = await parse(); } catch { err = {}; }
+    const message =
+      err["hydra:description"] ||
+      err["detail"] ||
+      err.message ||
+      res.statusText;
+    throw new Error(message);
   }
-  return body;
+
+  return parse();
 }
 
-/** Normalise la collection API Platform v3 (member) / v2 (hydra:member) */
+// petit utilitaire pour collection hydra
 export function parseCollection(data) {
-  if (Array.isArray(data?.member)) return data.member;
-  if (Array.isArray(data?.["hydra:member"])) return data["hydra:member"];
+  if (!data) return [];
   if (Array.isArray(data)) return data;
-  return [];
+  return data["hydra:member"] || data.member || [];
 }
