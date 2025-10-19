@@ -1,190 +1,164 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { apiFetch } from "../../lib/api";
-import { useAuth } from "../../context/AuthContext";
+import { apiFetch, parseCollection, getToken, decodeJwt } from "../../lib/api";
+import ChildForm from "./ChildForm";
 
-/** Values MUST MATCH your PHP enum backing values exactly */
-const CLASS_LEVELS = [
-  "6e","5e","4e","3e","2nde","1ère","Terminale",
-  "Bac+1","Bac+2","Bac+3","Bac+4","Bac+5",
-];
+const ClassLevelLabels = {
+  "6e": "6e", "5e": "5e", "4e": "4e", "3e": "3e",
+  "2nde": "Seconde", "1ère": "Première", "Terminale": "Terminale",
+  "Bac+1": "Bac+1", "Bac+2": "Bac+2", "Bac+3": "Bac+3", "Bac+4": "Bac+4", "Bac+5": "Bac+5",
+};
 
-export default function ChildForm({
-  open,
-  onClose,
-  onSaved,
-  initial = null, // if not null => edit mode
-}) {
-  const { user } = useAuth();
-  const token = user?.token || localStorage.getItem("token");
+// utilitaire: normalise un enfant venant d'API Platform (objets <> IRIs)
+function normalizeChild(raw) {
+  const subjects = (raw.subjects || []).map(s => {
+    if (typeof s === "string") {
+      // IRI -> id/label pas connus ici
+      const id = Number(s.split("/").pop());
+      return { id, name: `#${id}`, "@id": s };
+    }
+    return { id: s.id, name: s.name, "@id": s["@id"] || `/api/subjects/${s.id}` };
+  });
 
-  const isEdit = !!initial?.id;
-
-  const [firstName, setFirstName] = useState(initial?.firstName || "");
-  const [lastName,  setLastName]  = useState(initial?.lastName  || "");
-  const [classLevel,setClassLevel]= useState(initial?.classLevel || "");
-  const [subjects,  setSubjects]  = useState([]); // available subjects list
-  const [subjectIds,setSubjectIds]= useState([]); // selected ids (numbers)
-  const [saving, setSaving] = useState(false);
-  const [error,  setError]  = useState("");
-
-  // Load subjects once
-  useEffect(() => {
-    if (!open) return;
-    (async () => {
-      try {
-        const data = await apiFetch("/api/subjects", { token });
-        const items = (data["hydra:member"] || []).map(s => ({
-          id: s.id, name: s.name, iri: s["@id"],
-        }));
-        setSubjects(items);
-        // pre-fill selected subjects in edit mode
-        if (initial?.subjects?.length) {
-          // initial.subjects are IRIs ("/api/subjects/1")
-          const ids = initial.subjects.map(iri => Number(String(iri).split("/").pop()));
-          setSubjectIds(ids);
-        }
-      } catch (e) {
-        setError(e.message);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
-
-  // Convert selected ids -> IRI array for API Platform
-  const subjectsIris = useMemo(
-    () => subjects
-      .filter(s => subjectIds.includes(s.id))
-      .map(s => s.iri),
-    [subjects, subjectIds]
-  );
-
-  const reset = () => {
-    setFirstName(""); setLastName(""); setClassLevel(""); setSubjectIds([]);
-    setError(""); setSaving(false);
+  return {
+    id: raw.id,
+    firstName: raw.firstName,
+    lastName: raw.lastName,
+    classLevel: raw.classLevel,
+    createdAt: raw.createdAt,
+    subjects,
   };
+}
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSaving(true); setError("");
+export default function Children() {
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState("");
+  const [kids, setKids]         = useState([]);
+  const [subjects, setSubjects] = useState([]);
 
-    const payload = {
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      classLevel,
-      subjects: subjectsIris, // API Platform ManyToMany via IRIs
-    };
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing]     = useState(null); // enfant à éditer ou null
 
+  const token = getToken();
+  const tokenInfo = useMemo(() => decodeJwt(token), [token]);
+
+  const load = async () => {
+    setLoading(true);
+    setError("");
     try {
-      if (isEdit) {
-        // API Platform prefers merge-patch+json for PATCH
-        await apiFetch(`/api/children/${initial.id}`, {
-          method: "PATCH",
-          token,
-          body: payload,
-          contentType: "application/merge-patch+json",
-        });
-      } else {
-        await apiFetch("/api/children", {
-          method: "POST",
-          token,
-          body: payload,
-        });
-      }
-      onSaved?.();
-      reset();
-      onClose?.();
+      const [childrenRes, subjectsRes] = await Promise.all([
+        apiFetch("/api/children"),
+        apiFetch("/api/subjects?pagination=false"),
+      ]);
+
+      const rawKids = parseCollection(childrenRes);
+      setKids(rawKids.map(normalizeChild));
+
+      // liste des matières
+      setSubjects(parseCollection(subjectsRes));
     } catch (e) {
-      setError(e.message);
+      setError(e.message || "Erreur de chargement");
+      setKids([]);
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
 
-  if (!open) return null;
+  useEffect(() => { load(); }, []);
+
+  const openCreate = () => { setEditing(null); setModalOpen(true); };
+  const openEdit   = (kid) => { setEditing(kid); setModalOpen(true); };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Supprimer cet enfant ?")) return;
+    try {
+      await apiFetch(`/api/children/${id}`, { method: "DELETE" });
+      setKids(k => k.filter(x => x.id !== id));
+    } catch (e) {
+      alert(`Suppression échouée: ${e.message}`);
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/40">
-      <div className="w-full max-w-xl p-6 bg-white shadow-xl rounded-2xl">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">
-            {isEdit ? "Modifier l’enfant" : "Ajouter un enfant"}
-          </h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
-        </div>
-
-        {error && (
-          <div className="px-3 py-2 mb-4 text-sm text-red-700 rounded-lg bg-red-50">
-            {error}
-          </div>
-        )}
-
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Prénom</label>
-              <input
-                value={firstName} onChange={e=>setFirstName(e.target.value)}
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-200"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Nom</label>
-              <input
-                value={lastName} onChange={e=>setLastName(e.target.value)}
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-200"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Niveau</label>
-            <select
-              value={classLevel}
-              onChange={e=>setClassLevel(e.target.value)}
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-200"
-              required
-            >
-              <option value="">— Sélectionner —</option>
-              {CLASS_LEVELS.map(v => <option key={v} value={v}>{v}</option>)}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Matières</label>
-            <div className="grid grid-cols-1 gap-2 mt-2 sm:grid-cols-2">
-              {subjects.map(s => {
-                const checked = subjectIds.includes(s.id);
-                return (
-                  <label key={s.id} className={`flex cursor-pointer items-center justify-between rounded-lg border px-3 py-2 text-sm ${checked ? "border-indigo-400 bg-indigo-50 text-indigo-700" : "border-gray-300 hover:bg-gray-50"}`}>
-                    <span>{s.name}</span>
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4"
-                      checked={checked}
-                      onChange={()=>{
-                        setSubjectIds(ids =>
-                          ids.includes(s.id) ? ids.filter(x=>x!==s.id) : [...ids, s.id]
-                        );
-                      }}
-                    />
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-              Annuler
-            </button>
-            <button disabled={saving} className="px-4 py-2 font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-60">
-              {saving ? "Enregistrement..." : (isEdit ? "Mettre à jour" : "Créer")}
-            </button>
-          </div>
-        </form>
+    <div className="space-y-6">
+      {/* DEBUG (enlève en prod) */}
+      <div className="p-3 text-xs border rounded-lg border-amber-200 bg-amber-50 text-amber-800">
+        <strong>Debug Auth</strong> — token ? {token ? "oui" : "non"} • roles:&nbsp;
+        {(tokenInfo?.roles || []).join(", ") || "?"}
       </div>
+
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Mes enfants</h1>
+          <p className="text-gray-600">Gérez le profil et les matières suivies.</p>
+        </div>
+        <button
+          onClick={openCreate}
+          className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-indigo-700"
+        >
+          + Ajouter un enfant
+        </button>
+      </header>
+
+      {loading ? (
+        <div className="p-6 bg-white border border-gray-200 shadow-sm rounded-xl">Chargement…</div>
+      ) : error ? (
+        <div className="p-6 text-red-700 border border-red-200 shadow-sm rounded-xl bg-red-50">{error}</div>
+      ) : kids.length === 0 ? (
+        <div className="p-6 text-gray-600 bg-white border border-gray-200 shadow-sm rounded-xl">
+          Aucun enfant pour l’instant.
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
+          {kids.map((c) => (
+            <div key={c.id} className="p-5 bg-white border border-gray-200 shadow-sm rounded-2xl">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-semibold text-gray-900">
+                    {c.firstName} {c.lastName}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Niveau : {ClassLevelLabels[c.classLevel] || c.classLevel}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => openEdit(c)}
+                    className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm hover:bg-gray-50"
+                  >
+                    Modifier
+                  </button>
+                  <button
+                    onClick={() => handleDelete(c.id)}
+                    className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-sm text-red-700 hover:bg-red-100"
+                  >
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 mt-3">
+                {(c.subjects || []).map((s) => (
+                  <span
+                    key={s.id || s["@id"] || s}
+                    className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700"
+                  >
+                    {s.name || s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* MODAL */}
+      <ChildForm
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSaved={load}
+        initial={editing}
+        subjects={subjects}
+      />
     </div>
   );
 }
