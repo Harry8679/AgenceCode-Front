@@ -1,23 +1,31 @@
 import { createContext, useContext, useEffect, useState } from "react";
-// ⬇️ on importe depuis lib/api
 import { getToken, isTokenExpired } from "../lib/api";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  // Hydrater immédiatement depuis localStorage pour éviter le flash au 1er render
+  const [user, setUser] = useState(() => {
+    try {
+      const raw = localStorage.getItem("user");
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem("user");
       const tok = getToken();
-      if (raw && tok && !isTokenExpired(tok)) {
-        setUser(JSON.parse(raw));
+      if (tok && !isTokenExpired(tok)) {
+        // si token valide, on garde l'état (déjà lu ci-dessus)
       } else {
         localStorage.removeItem("user");
         localStorage.removeItem("token");
+        setUser(null);
       }
-    } catch {}
+    } finally {
+      setReady(true); // ✅ l’hydratation est terminée
+    }
   }, []);
 
   const login = (userData) => {
@@ -33,7 +41,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, ready }}>
       {children}
     </AuthContext.Provider>
   );
