@@ -1,6 +1,6 @@
-// src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
-import { getToken, isTokenExpired } from "../lib/auth";
+// ⬇️ on importe depuis lib/api
+import { getToken, isTokenExpired } from "../lib/api";
 
 const AuthContext = createContext(null);
 
@@ -38,4 +38,5 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
 export const useAuth = () => useContext(AuthContext);
