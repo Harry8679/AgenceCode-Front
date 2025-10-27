@@ -1,21 +1,27 @@
+// src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
+import { getToken, isTokenExpired } from "../lib/auth";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  // Hydrate depuis localStorage au chargement
   useEffect(() => {
     try {
       const raw = localStorage.getItem("user");
-      if (raw) setUser(JSON.parse(raw));
+      const tok = getToken();
+      if (raw && tok && !isTokenExpired(tok)) {
+        setUser(JSON.parse(raw));
+      } else {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+      }
     } catch {}
   }, []);
 
   const login = (userData) => {
     setUser(userData);
-    // garde un seul endroit “source de vérité”
     localStorage.setItem("user", JSON.stringify(userData));
     if (userData?.token) localStorage.setItem("token", userData.token);
   };
@@ -32,5 +38,4 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
 export const useAuth = () => useContext(AuthContext);
