@@ -13,6 +13,18 @@ export function decodeJwt(token) {
   } catch { return null; }
 }
 
+export const isTokenExpired = (t) => {
+  const { exp } = decodeJwt(t);
+  return exp ? exp * 1000 <= Date.now() : false;
+};
+
+export const hardLogoutAndRedirect = () => {
+  localStorage.removeItem("user");
+  localStorage.removeItem("token");
+  // redirection immédiate (sans dépendre de React Router)
+  window.location.replace("/");
+};
+
 export async function apiFetch(path, {
   method = "GET",
   token = getToken(),
