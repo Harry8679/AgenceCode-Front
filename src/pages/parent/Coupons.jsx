@@ -162,7 +162,7 @@ export default function Coupons() {
                   {g.items
                     .sort((a, b) => b.remainingMinutes - a.remainingMinutes)
                     .map((c) => {
-                      const st = statusFromRemaining(c.remainingMinutes, c.durationMinutes);
+                      const st =  (c.remainingMinutes, c.durationMinutes);
                       return (
                         <tr key={c.id} className="border-b last:border-none">
                           <td className="px-4 py-3 font-mono text-gray-900">{shortCode(c.code)}</td>
