@@ -81,10 +81,10 @@ export default function Children() {
   return (
     <div className="space-y-6">
       {/* DEBUG (enlève en prod) */}
-      <div className="p-3 text-xs border rounded-lg border-amber-200 bg-amber-50 text-amber-800">
+      {/* <div className="p-3 text-xs border rounded-lg border-amber-200 bg-amber-50 text-amber-800">
         <strong>Debug Auth</strong> — token ? {token ? "oui" : "non"} • roles:&nbsp;
         {(tokenInfo?.roles || []).join(", ") || "?"}
-      </div>
+      </div> */}
 
       <header className="flex items-center justify-between">
         <div>
