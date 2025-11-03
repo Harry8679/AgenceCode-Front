@@ -11,23 +11,138 @@ const iriToId = (iri) => {
   return Number.isNaN(id) ? null : id;
 };
 
+// Code court pour l’affichage en tableau
 const shortCode = (code) =>
   code ? `C-${code.slice(0, 2)}${code.slice(-3)}`.toUpperCase() : "—";
 
-// ici tu peux choisir le label que tu veux
 const statusFromRemaining = (remaining, duration) => {
   const r = remaining ?? 0;
   const d = duration ?? 0;
-  if (r <= 0) return { label: "Utilisé", cls: "bg-rose-100 text-rose-700" }; // ex-“Épuisé”
+  if (r <= 0) return { label: "Épuisé", cls: "bg-rose-100 text-rose-700" };
   if (r >= d) return { label: "Actif", cls: "bg-green-100 text-green-700" };
   return { label: "Partiel", cls: "bg-amber-100 text-amber-700" };
 };
 
-const minutesToHoursLabel = (min) => `${Math.max(0, Math.round((min ?? 0) / 60))} h`;
-
-const centsToEuro = (cents) =>
-  typeof cents === "number" ? (cents / 100).toFixed(2) + " €" : "—";
+const minutesToHoursLabel = (min) =>
+  `${Math.max(0, Math.round((min ?? 0) / 60))} h`;
 // -----------------------------
+
+// ---------- Modal de détails ----------
+function CouponDetailModal({ coupon, onClose }) {
+  if (!coupon) return null;
+
+  const st = statusFromRemaining(
+    coupon.remainingMinutes,
+    coupon.durationMinutes
+  );
+
+  const purchasedLabel = coupon.purchasedAt
+    ? new Date(coupon.purchasedAt).toLocaleString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "—";
+
+  const parentPrice =
+    coupon.unitPriceParentCents != null
+      ? `${(coupon.unitPriceParentCents / 100).toFixed(2)} €`
+      : "—";
+
+  const teacherPrice =
+    coupon.unitPriceTeacherCents != null
+      ? `${(coupon.unitPriceTeacherCents / 100).toFixed(2)} €`
+      : "—";
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/40">
+      <div className="w-full max-w-lg p-6 bg-white shadow-xl rounded-2xl">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">
+            Coupon {shortCode(coupon.code)}
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="space-y-3 text-sm text-gray-800">
+          {/* 👉 Code complet */}
+          <div className="flex justify-between">
+            <span className="font-medium">Code complet :</span>
+            <span className="font-mono break-all">{coupon.code}</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="font-medium">Élève :</span>
+            <span>{coupon.childName}</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="font-medium">Matière :</span>
+            <span>{coupon.subjectName}</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="font-medium">Niveau :</span>
+            <span>{coupon.classLevel}</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="font-medium">Durée du coupon :</span>
+            <span>{minutesToHoursLabel(coupon.durationMinutes)}</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="font-medium">Temps restant :</span>
+            <span>{minutesToHoursLabel(coupon.remainingMinutes)}</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="font-medium">Statut :</span>
+            <span
+              className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${st.cls}`}
+            >
+              {st.label}
+            </span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="font-medium">Date d’achat :</span>
+            <span>{purchasedLabel}</span>
+          </div>
+
+          <hr className="my-2" />
+
+          <div className="flex justify-between">
+            <span className="font-medium">Prix payé par le parent :</span>
+            <span>{parentPrice}</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="font-medium">Tarif prof (par coupon) :</span>
+            <span>{teacherPrice}</span>
+          </div>
+        </div>
+
+        <div className="flex justify-end mt-6">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+// --------------------------------------
 
 export default function Coupons() {
   const [loading, setLoading] = useState(true);
@@ -35,7 +150,7 @@ export default function Coupons() {
   const [coupons, setCoupons] = useState([]);
   const [children, setChildren] = useState([]);
   const [subjects, setSubjects] = useState([]);
-  const [selected, setSelected] = useState(null); // <- coupon sélectionné pour la modale
+  const [selected, setSelected] = useState(null); // coupon sélectionné pour la modale
 
   useEffect(() => {
     (async () => {
@@ -60,6 +175,7 @@ export default function Coupons() {
     })();
   }, []);
 
+  // index enfants / matières
   const childById = useMemo(() => {
     const map = new Map();
     for (const k of children) map.set(k.id, k);
@@ -72,9 +188,10 @@ export default function Coupons() {
     return map;
   }, [subjects]);
 
+  // normalisation des coupons
   const rows = useMemo(() => {
     return coupons.map((c) => {
-      // ------- child -------
+      // enfant
       let childId = null;
       let childName = "Élève ?";
       if (c.child && typeof c.child === "object") {
@@ -90,7 +207,7 @@ export default function Coupons() {
             `${kid.firstName ?? ""} ${kid.lastName ?? ""}`.trim() || childName;
       }
 
-      // ------- subject -------
+      // matière
       let subjectName = "—";
       if (c.subject && typeof c.subject === "object") {
         subjectName = c.subject.name ?? subjectName;
@@ -109,22 +226,19 @@ export default function Coupons() {
         classLevel: c.classLevel ?? "—",
         durationMinutes: c.durationMinutes ?? c.duration ?? 0,
         remainingMinutes: c.remainingMinutes ?? 0,
-        purchasedAt: c.purchasedAt,
-        unitPriceParentCents: c.unitPriceParentCents,
-        unitPriceTeacherCents: c.unitPriceTeacherCents,
+        purchasedAt: c.purchasedAt ?? null,
+        unitPriceParentCents: c.unitPriceParentCents ?? null,
+        unitPriceTeacherCents: c.unitPriceTeacherCents ?? null,
       };
     });
   }, [coupons, childById, subjectById]);
 
+  // groupement par élève
   const groups = useMemo(() => {
     const byKid = new Map();
     for (const r of rows) {
       if (!byKid.has(r.childId)) {
-        byKid.set(r.childId, {
-          childId: r.childId,
-          childName: r.childName,
-          items: [],
-        });
+        byKid.set(r.childId, { childId: r.childId, childName: r.childName, items: [] });
       }
       byKid.get(r.childId).items.push(r);
     }
@@ -165,9 +279,7 @@ export default function Coupons() {
       ) : (
         groups.map((g) => (
           <section key={g.childId ?? `kid-${g.childName}`} className="space-y-3">
-            <h2 className="text-lg font-semibold text-gray-900">
-              {g.childName}
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-900">{g.childName}</h2>
 
             <div className="overflow-hidden bg-white border border-gray-200 shadow-sm rounded-2xl">
               <table className="min-w-full text-left">
@@ -183,9 +295,7 @@ export default function Coupons() {
                 </thead>
                 <tbody className="text-sm">
                   {g.items
-                    .sort(
-                      (a, b) => b.remainingMinutes - a.remainingMinutes
-                    )
+                    .sort((a, b) => b.remainingMinutes - a.remainingMinutes)
                     .map((c) => {
                       const st = statusFromRemaining(
                         c.remainingMinutes,
@@ -211,7 +321,7 @@ export default function Coupons() {
                           <td className="px-4 py-3 text-right">
                             <button
                               className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm hover:bg-gray-50"
-                              onClick={() => setSelected(c)} // ⚡ ouvrir la modale
+                              onClick={() => setSelected(c)}
                             >
                               Détails
                             </button>
@@ -230,101 +340,13 @@ export default function Coupons() {
         Donnez l’ID du coupon au professeur pour valider chaque cours.
       </div>
 
-      {/* MODALE DE DÉTAILS */}
+      {/* Popup de détails */}
       {selected && (
         <CouponDetailModal
           coupon={selected}
           onClose={() => setSelected(null)}
         />
       )}
-    </div>
-  );
-}
-
-// ------------ Composant de popup ------------
-function CouponDetailModal({ coupon, onClose }) {
-  const st = statusFromRemaining(
-    coupon.remainingMinutes,
-    coupon.durationMinutes
-  );
-
-  const purchasedLabel = coupon.purchasedAt
-    ? new Date(coupon.purchasedAt).toLocaleString("fr-FR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "—";
-
-  return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/40">
-      <div className="w-full max-w-lg p-6 bg-white shadow-xl rounded-2xl">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">
-            Coupon {shortCode(coupon.code)}
-          </h3>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="space-y-3 text-sm text-gray-800">
-          <div className="flex justify-between">
-            <span className="font-medium">Élève :</span>
-            <span>{coupon.childName}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium">Matière :</span>
-            <span>{coupon.subjectName}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium">Niveau :</span>
-            <span>{coupon.classLevel}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium">Durée du coupon :</span>
-            <span>{minutesToHoursLabel(coupon.durationMinutes)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium">Heures restantes :</span>
-            <span>{minutesToHoursLabel(coupon.remainingMinutes)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium">Statut :</span>
-            <span
-              className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${st.cls}`}
-            >
-              {st.label}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium">Date d’achat :</span>
-            <span>{purchasedLabel}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium">Prix payé par le parent :</span>
-            <span>{centsToEuro(coupon.unitPriceParentCents)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium">Prix prof (par coupon) :</span>
-            <span>{centsToEuro(coupon.unitPriceTeacherCents)}</span>
-          </div>
-        </div>
-
-        <div className="flex justify-end mt-6">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
-          >
-            Fermer
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
