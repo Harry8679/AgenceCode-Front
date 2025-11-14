@@ -39,7 +39,7 @@ export default function Children() {
   const [editing, setEditing]     = useState(null); // enfant à éditer ou null
 
   const token = getToken();
-  const tokenInfo = useMemo(() => decodeJwt(token), [token]);
+  // const tokenInfo = useMemo(() => decodeJwt(token), [token]);
 
   const load = async () => {
     setLoading(true);
