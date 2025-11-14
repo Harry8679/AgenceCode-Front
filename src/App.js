@@ -6,13 +6,20 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
+
+// Pages publiques
 import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
-import DashboardRoutes from "./pages/Dashboard";
 
-// 👉 nouvelle page
+// Dashboard + profil
+import DashboardRoutes from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+
+// 👉 nouvelles pages Assignments
+import ParentAssignments from "./pages/parent/Assignments";     // /dashboard/profs
+import TeacherAssignments from "./pages/teacher/MyAssignments"; // /teacher/assignments
+import AssignmentsAdmin from "./pages/admin/AssignmentsAdmin";  // /admin/assignments
 
 function App() {
   return (
@@ -22,9 +29,30 @@ function App() {
         <main className="main-content">
           <Routes>
             {/* Public */}
-            <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
-            <Route path="/inscription" element={<PublicRoute><Register /></PublicRoute>} />
-            <Route path="/connexion" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route
+              path="/"
+              element={
+                <PublicRoute>
+                  <Home />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/inscription"
+              element={
+                <PublicRoute>
+                  <Register />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/connexion"
+              element={
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
+              }
+            />
 
             {/* Profil (protégé) */}
             <Route
@@ -36,12 +64,42 @@ function App() {
               }
             />
 
-            {/* Dashboard (protégé) */}
+            {/* Dashboard parent (protégé) */}
             <Route
               path="/dashboard/*"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute /* roles={['ROLE_PARENT']} si ton ProtectedRoute gère les rôles */>
                   <DashboardRoutes />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* 👉 Assignments Parent : page “Professeurs” */}
+            <Route
+              path="/dashboard/profs"
+              element={
+                <ProtectedRoute /* roles={['ROLE_PARENT']} */>
+                  <ParentAssignments />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* 👉 Assignments Prof */}
+            <Route
+              path="/teacher/assignments"
+              element={
+                <ProtectedRoute /* roles={['ROLE_TEACHER']} */>
+                  <TeacherAssignments />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* 👉 Assignments Admin */}
+            <Route
+              path="/admin/assignments"
+              element={
+                <ProtectedRoute /* roles={['ROLE_ADMIN']} */>
+                  <AssignmentsAdmin />
                 </ProtectedRoute>
               }
             />
@@ -55,4 +113,5 @@ function App() {
     </AuthProvider>
   );
 }
+
 export default App;
