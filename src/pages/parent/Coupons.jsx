@@ -1,5 +1,5 @@
 // src/pages/parent/Coupons.jsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { apiFetch, parseCollection } from "../../lib/api";
 
 // ---------- helpers ----------
@@ -29,9 +29,10 @@ const minutesToHoursLabel = (min) =>
 
 // ---------- Modal de détails ----------
 function CouponDetailModal({ coupon, onClose }) {
-  if (!coupon) return null;
+  // ✅ les hooks toujours en haut, jamais après un return conditionnel
+  const captureRef = React.useRef(null);
 
-  const captureRef = useRef(null);
+  if (!coupon) return null;
 
   const st = statusFromRemaining(
     coupon.remainingMinutes,
@@ -58,42 +59,34 @@ function CouponDetailModal({ coupon, onClose }) {
       ? `${(coupon.unitPriceTeacherCents / 100).toFixed(2)} €`
       : "—";
 
-  // --- Télécharger en PDF (capture le contenu de la modale) ---
   const handleDownloadPdf = async () => {
     try {
-      // import dynamique (pas de bundle initial plus lourd)
       const { jsPDF } = await import("jspdf");
       const html2canvas = (await import("html2canvas")).default;
 
       const node = captureRef.current;
       if (!node) return;
 
-      // capture en canvas
       const canvas = await html2canvas(node, {
         backgroundColor: "#ffffff",
-        scale: 2, // meilleure définition
+        scale: 2,
       });
 
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF({ unit: "pt", format: "a4" });
 
-      // calcul dimension pour rentrer sur A4
       const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = pageWidth - 40; // marges
+      const imgWidth  = pageWidth - 40;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
       pdf.addImage(imgData, "PNG", 20, 20, imgWidth, imgHeight);
-
-      const fileName = `coupon-${coupon.code}.pdf`;
-      pdf.save(fileName);
+      pdf.save(`coupon-${coupon.code}.pdf`);
     } catch (e) {
       console.error("PDF error:", e);
-      alert("Impossible de générer le PDF. Assure-toi d’avoir installé jspdf et html2canvas.");
+      alert("Impossible de générer le PDF. Installe jspdf et html2canvas.");
     }
   };
 
-  // --- Partager par e-mail : ouvre un mailto pré-rempli ---
   const handleShareEmail = () => {
     const subject = encodeURIComponent(`Coupon ${coupon.code} – ${coupon.childName}`);
     const lines = [
@@ -109,111 +102,45 @@ function CouponDetailModal({ coupon, onClose }) {
       ``,
       `Cordialement,`,
     ];
-    const body = encodeURIComponent(lines.join("\n"));
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:?subject=${subject}&body=${encodeURIComponent(lines.join("\n"))}`;
   };
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/40">
       <div className="w-full max-w-lg p-6 bg-white shadow-xl rounded-2xl">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">
-            Coupon {shortCode(coupon.code)}
-          </h3>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-            aria-label="Fermer"
-            title="Fermer"
-          >
-            ✕
-          </button>
+          <h3 className="text-lg font-semibold">Coupon {shortCode(coupon.code)}</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700" aria-label="Fermer">✕</button>
         </div>
 
         {/* Zone capturée en PDF */}
         <div ref={captureRef} className="space-y-3 text-sm text-gray-800">
-          {/* 👉 Code complet */}
-          <div className="flex justify-between">
-            <span className="font-medium">Code complet :</span>
-            <span className="font-mono break-all">{coupon.code}</span>
-          </div>
-
-          <div className="flex justify-between">
-            <span className="font-medium">Élève :</span>
-            <span>{coupon.childName}</span>
-          </div>
-
-          <div className="flex justify-between">
-            <span className="font-medium">Matière :</span>
-            <span>{coupon.subjectName}</span>
-          </div>
-
-          <div className="flex justify-between">
-            <span className="font-medium">Niveau :</span>
-            <span>{coupon.classLevel}</span>
-          </div>
-
-          <div className="flex justify-between">
-            <span className="font-medium">Durée du coupon :</span>
-            <span>{minutesToHoursLabel(coupon.durationMinutes)}</span>
-          </div>
-
-          <div className="flex justify-between">
-            <span className="font-medium">Temps restant :</span>
-            <span>{minutesToHoursLabel(coupon.remainingMinutes)}</span>
-          </div>
-
+          <div className="flex justify-between"><span className="font-medium">Code complet :</span><span className="font-mono break-all">{coupon.code}</span></div>
+          <div className="flex justify-between"><span className="font-medium">Élève :</span><span>{coupon.childName}</span></div>
+          <div className="flex justify-between"><span className="font-medium">Matière :</span><span>{coupon.subjectName}</span></div>
+          <div className="flex justify-between"><span className="font-medium">Niveau :</span><span>{coupon.classLevel}</span></div>
+          <div className="flex justify-between"><span className="font-medium">Durée du coupon :</span><span>{minutesToHoursLabel(coupon.durationMinutes)}</span></div>
+          <div className="flex justify-between"><span className="font-medium">Temps restant :</span><span>{minutesToHoursLabel(coupon.remainingMinutes)}</span></div>
           <div className="flex justify-between">
             <span className="font-medium">Statut :</span>
-            <span
-              className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${st.cls}`}
-            >
-              {st.label}
-            </span>
+            <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${st.cls}`}>{st.label}</span>
           </div>
-
-          <div className="flex justify-between">
-            <span className="font-medium">Date d’achat :</span>
-            <span>{purchasedLabel}</span>
-          </div>
-
+          <div className="flex justify-between"><span className="font-medium">Date d’achat :</span><span>{purchasedLabel}</span></div>
           <hr className="my-2" />
-
-          <div className="flex justify-between">
-            <span className="font-medium">Prix payé par le parent :</span>
-            <span>{parentPrice}</span>
-          </div>
-
-          <div className="flex justify-between">
-            <span className="font-medium">Tarif prof (par coupon) :</span>
-            <span>{teacherPrice}</span>
-          </div>
+          <div className="flex justify-between"><span className="font-medium">Prix payé par le parent :</span><span>{parentPrice}</span></div>
+          <div className="flex justify-between"><span className="font-medium">Tarif prof (par coupon) :</span><span>{teacherPrice}</span></div>
         </div>
 
         <div className="flex flex-wrap justify-end gap-3 mt-6">
-          <button
-            onClick={handleShareEmail}
-            className="px-4 py-2 text-sm font-medium text-white bg-sky-600 rounded-lg hover:bg-sky-700"
-          >
-            Partager par e-mail
-          </button>
-          <button
-            onClick={handleDownloadPdf}
-            className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700"
-          >
-            Télécharger en PDF
-          </button>
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-          >
-            Fermer
-          </button>
+          <button onClick={handleShareEmail} className="px-4 py-2 text-sm font-medium text-white bg-sky-600 rounded-lg hover:bg-sky-700">Partager par e-mail</button>
+          <button onClick={handleDownloadPdf} className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700">Télécharger en PDF</button>
+          <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Fermer</button>
         </div>
       </div>
     </div>
   );
 }
+
 // --------------------------------------
 
 export default function Coupons() {
