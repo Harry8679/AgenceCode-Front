@@ -1,5 +1,5 @@
 // src/pages/parent/Coupons.jsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { apiFetch, parseCollection } from "../../lib/api";
 
 // ---------- helpers ----------
@@ -31,6 +31,8 @@ const minutesToHoursLabel = (min) =>
 function CouponDetailModal({ coupon, onClose }) {
   if (!coupon) return null;
 
+  const captureRef = useRef(null);
+
   const st = statusFromRemaining(
     coupon.remainingMinutes,
     coupon.durationMinutes
@@ -56,6 +58,61 @@ function CouponDetailModal({ coupon, onClose }) {
       ? `${(coupon.unitPriceTeacherCents / 100).toFixed(2)} €`
       : "—";
 
+  // --- Télécharger en PDF (capture le contenu de la modale) ---
+  const handleDownloadPdf = async () => {
+    try {
+      // import dynamique (pas de bundle initial plus lourd)
+      const { jsPDF } = await import("jspdf");
+      const html2canvas = (await import("html2canvas")).default;
+
+      const node = captureRef.current;
+      if (!node) return;
+
+      // capture en canvas
+      const canvas = await html2canvas(node, {
+        backgroundColor: "#ffffff",
+        scale: 2, // meilleure définition
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ unit: "pt", format: "a4" });
+
+      // calcul dimension pour rentrer sur A4
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pageWidth - 40; // marges
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", 20, 20, imgWidth, imgHeight);
+
+      const fileName = `coupon-${coupon.code}.pdf`;
+      pdf.save(fileName);
+    } catch (e) {
+      console.error("PDF error:", e);
+      alert("Impossible de générer le PDF. Assure-toi d’avoir installé jspdf et html2canvas.");
+    }
+  };
+
+  // --- Partager par e-mail : ouvre un mailto pré-rempli ---
+  const handleShareEmail = () => {
+    const subject = encodeURIComponent(`Coupon ${coupon.code} – ${coupon.childName}`);
+    const lines = [
+      `Bonjour,`,
+      ``,
+      `Voici le coupon pour ${coupon.childName} :`,
+      `• Code complet : ${coupon.code}`,
+      `• Matière : ${coupon.subjectName}`,
+      `• Niveau : ${coupon.classLevel}`,
+      `• Durée : ${minutesToHoursLabel(coupon.durationMinutes)}`,
+      `• Temps restant : ${minutesToHoursLabel(coupon.remainingMinutes)}`,
+      `• Date d’achat : ${purchasedLabel}`,
+      ``,
+      `Cordialement,`,
+    ];
+    const body = encodeURIComponent(lines.join("\n"));
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  };
+
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/40">
       <div className="w-full max-w-lg p-6 bg-white shadow-xl rounded-2xl">
@@ -66,12 +123,15 @@ function CouponDetailModal({ coupon, onClose }) {
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
+            aria-label="Fermer"
+            title="Fermer"
           >
             ✕
           </button>
         </div>
 
-        <div className="space-y-3 text-sm text-gray-800">
+        {/* Zone capturée en PDF */}
+        <div ref={captureRef} className="space-y-3 text-sm text-gray-800">
           {/* 👉 Code complet */}
           <div className="flex justify-between">
             <span className="font-medium">Code complet :</span>
@@ -130,7 +190,19 @@ function CouponDetailModal({ coupon, onClose }) {
           </div>
         </div>
 
-        <div className="flex justify-end mt-6">
+        <div className="flex flex-wrap justify-end gap-3 mt-6">
+          <button
+            onClick={handleShareEmail}
+            className="px-4 py-2 text-sm font-medium text-white bg-sky-600 rounded-lg hover:bg-sky-700"
+          >
+            Partager par e-mail
+          </button>
+          <button
+            onClick={handleDownloadPdf}
+            className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700"
+          >
+            Télécharger en PDF
+          </button>
           <button
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
