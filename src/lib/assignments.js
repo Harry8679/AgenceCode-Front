@@ -1,75 +1,108 @@
 // src/lib/assignments.js
 import { apiFetch, parseCollection } from "./api";
 
+/** Statuts côté front (doivent matcher ton enum PHP) */
 export const ASSIGNMENT_STATUS = {
   REQUESTED: "REQUESTED",
-  APPLIED: "APPLIED",
-  PROPOSED: "PROPOSED",
-  ACCEPTED: "ACCEPTED",
-  DECLINED: "DECLINED",
+  APPLIED:   "APPLIED",
+  PROPOSED:  "PROPOSED",
+  ACCEPTED:  "ACCEPTED",
+  DECLINED:  "DECLINED",
   CANCELLED: "CANCELLED",
 };
 
-// ----------- READ -----------
+/* ===========================
+ * QUERIES (fetch lists)
+ * =========================== */
 export async function getParentAssignments() {
-  // côté API: provider qui ne renvoie que les assignations du parent connecté
-  const res = await apiFetch("/api/assignments?pagination=false");
+  const res = await apiFetch("/api/assignments?scope=parent&pagination=false");
   return parseCollection(res);
 }
 
 export async function getTeacherAssignments() {
-  // provider qui renvoie les assignations où l’utilisateur est teacher OU celles proposées
-  const res = await apiFetch("/api/my-assignments?pagination=false");
+  const res = await apiFetch("/api/assignments?scope=teacher&pagination=false");
   return parseCollection(res);
 }
 
 export async function getAllAssignmentsAdmin() {
-  const res = await apiFetch("/api/assignments?pagination=false");
+  const res = await apiFetch("/api/assignments?scope=admin&pagination=false");
   return parseCollection(res);
 }
 
-// ----------- CREATE (parent demande un prof) -----------
-export async function requestTeacher({ childIri, subjectIri, message }) {
+/* ===========================
+ * PARENT actions
+ * =========================== */
+/** ancien nom que ta page importe : createAssignmentRequest */
+export async function createAssignmentRequest({ child, subject, message }) {
+  // child et subject peuvent être des IDs (num) ou des IRIs "/api/children/1"
   return apiFetch("/api/assignments", {
     method: "POST",
-    json: { child: childIri, subject: subjectIri, message },
+    body: JSON.stringify({
+      child,
+      subject,
+      message: message ?? null,
+      status: ASSIGNMENT_STATUS.REQUESTED,
+    }),
   });
 }
 
-// ----------- ACTIONS (PATCH) -----------
-export async function teacherApply(id) {
-  return apiFetch(`/api/assignments/${id}`, {
+/** annulation d’une demande (PATCH custom) */
+export async function cancelAssignment(id) {
+  // Si tu as un operation PATCH custom: /api/assignments/{id}/cancel
+  // Sinon, garde le endpoint générique et passe le statut:
+  const url = `/api/assignments/${id}/cancel`; // ou `/api/assignments/${id}`
+  const body =
+    url.endsWith("/cancel")
+      ? {} // op. custom côté API ne demande pas forcément de body
+      : { status: ASSIGNMENT_STATUS.CANCELLED };
+
+  return apiFetch(url, {
     method: "PATCH",
-    json: { action: "apply" },
+    headers: { "Content-Type": "application/merge-patch+json" },
+    body: JSON.stringify(body),
+  });
+}
+
+/* ===========================
+ * TEACHER actions
+ * =========================== */
+export async function teacherApply(id, message) {
+  return apiFetch(`/api/assignments/${id}/apply`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/merge-patch+json" },
+    body: JSON.stringify({ message: message ?? null }),
   });
 }
 
 export async function teacherAccept(id) {
-  return apiFetch(`/api/assignments/${id}`, {
+  return apiFetch(`/api/assignments/${id}/accept`, {
     method: "PATCH",
-    json: { action: "accept" },
   });
 }
 
-export async function teacherDecline(id) {
-  return apiFetch(`/api/assignments/${id}`, {
+export async function teacherDecline(id, reason) {
+  return apiFetch(`/api/assignments/${id}/decline`, {
     method: "PATCH",
-    json: { action: "decline" },
+    headers: { "Content-Type": "application/merge-patch+json" },
+    body: JSON.stringify({ reason: reason ?? null }),
   });
 }
 
-// Admin propose un prof à une demande
-export async function adminPropose(id, teacherIri) {
-  return apiFetch(`/api/assignments/${id}`, {
+/* ===========================
+ * ADMIN actions (optionnel)
+ * =========================== */
+export async function adminPropose(id, teacherId, message) {
+  return apiFetch(`/api/assignments/${id}/propose`, {
     method: "PATCH",
-    json: { action: "propose", teacher: teacherIri },
+    headers: { "Content-Type": "application/merge-patch+json" },
+    body: JSON.stringify({ teacher: teacherId, message: message ?? null }),
   });
 }
 
-// Admin affecte définitivement (ou accepte côté admin)
-export async function adminAssign(id, teacherIri) {
-  return apiFetch(`/api/assignments/${id}`, {
+export async function adminAssign(id, teacherId) {
+  return apiFetch(`/api/assignments/${id}/assign`, {
     method: "PATCH",
-    json: { action: "assign", teacher: teacherIri },
+    headers: { "Content-Type": "application/merge-patch+json" },
+    body: JSON.stringify({ teacher: teacherId }),
   });
 }
