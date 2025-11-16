@@ -30,14 +30,7 @@ function App() {
           <Routes>
             {/* Public */}
             <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
-            <Route
-              path="/inscription"
-              element={
-                <PublicRoute>
-                  <Register />
-                </PublicRoute>
-              }
-            />
+            <Route path="/inscription" element={<PublicRoute><Register /></PublicRoute>} />
             <Route
               path="/connexion"
               element={
