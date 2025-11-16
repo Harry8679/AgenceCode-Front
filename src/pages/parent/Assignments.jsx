@@ -7,22 +7,49 @@ import {
   cancelAssignment,
   ASSIGNMENT_STATUS,
 } from "../../lib/assignments";
-import AssignmentCard from "../../components/AssignmentCard";
 
-// Petit header de section identique à l’Overview (barre grise)
+/* ---------- UI helpers (mêmes styles que Overview) ---------- */
 const SectionHeader = ({ title }) => (
   <div className="px-4 py-3 border-b bg-gray-50">
     <h2 className="text-sm font-semibold text-gray-700">{title}</h2>
   </div>
 );
 
-// Carte conteneur (arrondi + bordure + ombre), même style que les blocs de l’Overview
 const Card = ({ header, children }) => (
   <section className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
     {header ? <SectionHeader title={header} /> : null}
     <div className="p-4">{children}</div>
   </section>
 );
+
+const Badge = ({ children, tone = "gray" }) => {
+  const tones = {
+    gray:   "bg-gray-100 text-gray-700",
+    indigo: "bg-indigo-50 text-indigo-700",
+    green:  "bg-green-100 text-green-700",
+    amber:  "bg-amber-100 text-amber-700",
+    rose:   "bg-rose-100 text-rose-700",
+  };
+  return (
+    <span className={`rounded-full px-3 py-1 text-xs font-medium ${tones[tone] || tones.gray}`}>
+      {children}
+    </span>
+  );
+};
+
+function statusTone(status) {
+  switch (status) {
+    case ASSIGNMENT_STATUS.ACCEPTED: return "green";
+    case ASSIGNMENT_STATUS.APPLIED:
+    case ASSIGNMENT_STATUS.PROPOSED:
+    case ASSIGNMENT_STATUS.REQUESTED: return "indigo";
+    case ASSIGNMENT_STATUS.DECLINED: return "rose";
+    case ASSIGNMENT_STATUS.CANCELLED: return "gray";
+    default: return "gray";
+  }
+}
+
+/* ============================================================ */
 
 export default function ParentTeachers() {
   const [loading, setLoading]   = useState(true);
@@ -53,19 +80,12 @@ export default function ParentTeachers() {
   };
   useEffect(() => { load(); }, []);
 
-  // groupement par élève (pour un rendu en sections)
-  const groups = useMemo(() => {
-    const g = new Map();
-    for (const a of items) {
-      const kidId = a.child?.id ?? "unknown";
-      if (!g.has(kidId)) g.set(kidId, []);
-      g.get(kidId).push(a);
-    }
-    // tri : nom élève si dispo
-    return [...g.entries()].sort(([, A], [, B]) => {
-      const an = A[0]?.child ? `${A[0].child.firstName} ${A[0].child.lastName}` : "";
-      const bn = B[0]?.child ? `${B[0].child.firstName} ${B[0].child.lastName}` : "";
-      return an.localeCompare(bn);
+  // tri (plus récent d’abord)
+  const rows = useMemo(() => {
+    return [...items].sort((a, b) => {
+      const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const db = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return db - da;
     });
   }, [items]);
 
@@ -75,7 +95,7 @@ export default function ParentTeachers() {
     if (!form.childId || !form.subjectId) return;
     try {
       await createAssignmentRequest({
-        child:   Number(form.childId),     // accepte ID ou IRI
+        child:   Number(form.childId),
         subject: Number(form.subjectId),
         message: null,
       });
@@ -103,10 +123,7 @@ export default function ParentTeachers() {
 
       {/* Carte : Nouvelle demande */}
       <Card header="Nouvelle demande">
-        <form
-          onSubmit={onCreate}
-          className="flex flex-wrap items-end gap-3"
-        >
+        <form onSubmit={onCreate} className="flex flex-wrap items-end gap-3">
           <div>
             <label className="block text-sm text-gray-700 mb-1">Élève</label>
             <select
@@ -139,16 +156,16 @@ export default function ParentTeachers() {
             </select>
           </div>
 
-          <button
-            className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700"
-            type="submit"
-          >
-            + Demander un professeur
-          </button>
+        <button
+          className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700"
+          type="submit"
+        >
+          + Demander un professeur
+        </button>
         </form>
       </Card>
 
-      {/* États réseau en cartes pour rester cohérent */}
+      {/* États réseau en cartes */}
       {loading && (
         <Card>
           <div className="text-gray-700">Chargement…</div>
@@ -161,39 +178,77 @@ export default function ParentTeachers() {
         </Card>
       )}
 
-      {!loading && !err && items.length === 0 && (
-        <Card>
-          <div className="text-gray-600">Aucun professeur associé pour l’instant.</div>
-        </Card>
-      )}
+      {/* Liste des demandes AU FORMAT TABLE (comme “Prochains cours”) */}
+      {!loading && !err && (
+        <Card header="Demandes & affectations">
+          {rows.length === 0 ? (
+            <div className="text-gray-600">Aucun professeur associé pour l’instant.</div>
+          ) : (
+            <div className="-mx-4 -mb-4 overflow-x-auto">
+              <table className="min-w-full text-left">
+                <thead className="bg-gray-50 text-sm text-gray-600">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Élève</th>
+                    <th className="px-4 py-3 font-medium">Matière</th>
+                    <th className="px-4 py-3 font-medium">Professeur</th>
+                    <th className="px-4 py-3 font-medium">Statut</th>
+                    <th className="px-4 py-3 font-medium">Créé le</th>
+                    <th className="px-4 py-3" />
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {rows.map((a) => {
+                    const child = a.child
+                      ? `${a.child.firstName ?? ""} ${a.child.lastName ?? ""}`.trim()
+                      : "—";
+                    const subject = a.subject?.name ?? "—";
+                    const teacher = a.teacher
+                      ? `${a.teacher.firstName ?? ""} ${a.teacher.lastName ?? ""}`.trim()
+                      : "—";
+                    const created = a.createdAt
+                      ? new Date(a.createdAt).toLocaleString("fr-FR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "—";
+                    const canCancel = [
+                      ASSIGNMENT_STATUS.REQUESTED,
+                      ASSIGNMENT_STATUS.APPLIED,
+                      ASSIGNMENT_STATUS.PROPOSED,
+                    ].includes(a.status);
 
-      {/* Groupes d’assignments par élève, chaque groupe dans une carte */}
-      {!loading && !err && items.length > 0 && (
-        <>
-          {groups.map(([kidId, rows]) => {
-            const title = rows[0]?.child
-              ? `${rows[0].child.firstName} ${rows[0].child.lastName}`
-              : "Élève";
-            return (
-              <Card key={kidId} header={title}>
-                <div className="grid gap-3 md:grid-cols-2">
-                  {rows.map((a) => (
-                    <AssignmentCard
-                      key={a.id}
-                      a={a}
-                      onCancel={
-                        [ASSIGNMENT_STATUS.REQUESTED, ASSIGNMENT_STATUS.PROPOSED, ASSIGNMENT_STATUS.APPLIED]
-                          .includes(a.status)
-                          ? onCancel
-                          : null
-                      }
-                    />
-                  ))}
-                </div>
-              </Card>
-            );
-          })}
-        </>
+                    return (
+                      <tr key={a.id} className="border-b last:border-none">
+                        <td className="px-4 py-3 font-medium text-gray-900">{child || "Élève"}</td>
+                        <td className="px-4 py-3">{subject}</td>
+                        <td className="px-4 py-3">{teacher || "—"}</td>
+                        <td className="px-4 py-3">
+                          <Badge tone={statusTone(a.status)}>{a.status}</Badge>
+                        </td>
+                        <td className="px-4 py-3">{created}</td>
+                        <td className="px-4 py-3 text-right">
+                          {canCancel ? (
+                            <button
+                              className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm hover:bg-gray-50"
+                              onClick={() => onCancel(a)}
+                            >
+                              Annuler
+                            </button>
+                          ) : (
+                            <span className="text-gray-400 text-xs">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
       )}
     </div>
   );
