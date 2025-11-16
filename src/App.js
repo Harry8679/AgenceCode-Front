@@ -32,16 +32,8 @@ function App() {
             <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
             <Route path="/inscription" element={<PublicRoute><Register /></PublicRoute>} />
             <Route path="/connexion" element={<PublicRoute><Login /></PublicRoute>} />
-
             {/* Profil (protégé) */}
-            <Route
-              path="/profil"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/profil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
             {/* Dashboard parent (protégé) */}
             <Route
