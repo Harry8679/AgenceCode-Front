@@ -31,14 +31,7 @@ function App() {
             {/* Public */}
             <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
             <Route path="/inscription" element={<PublicRoute><Register /></PublicRoute>} />
-            <Route
-              path="/connexion"
-              element={
-                <PublicRoute>
-                  <Login />
-                </PublicRoute>
-              }
-            />
+            <Route path="/connexion" element={<PublicRoute><Login /></PublicRoute>} />
 
             {/* Profil (protégé) */}
             <Route
