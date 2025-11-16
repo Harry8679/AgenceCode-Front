@@ -29,14 +29,7 @@ function App() {
         <main className="main-content">
           <Routes>
             {/* Public */}
-            <Route
-              path="/"
-              element={
-                <PublicRoute>
-                  <Home />
-                </PublicRoute>
-              }
-            />
+            <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
             <Route
               path="/inscription"
               element={
