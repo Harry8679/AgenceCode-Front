@@ -156,16 +156,16 @@ export default function ParentTeachers() {
             </select>
           </div>
 
-        <button
-          className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700"
-          type="submit"
-        >
-          + Demander un professeur
-        </button>
+          <button
+            className="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700"
+            type="submit"
+          >
+            + Demander un professeur
+          </button>
         </form>
       </Card>
 
-      {/* États réseau en cartes */}
+      {/* États réseau en cartes (cohérent avec Overview) */}
       {loading && (
         <Card>
           <div className="text-gray-700">Chargement…</div>
@@ -178,7 +178,7 @@ export default function ParentTeachers() {
         </Card>
       )}
 
-      {/* Liste des demandes AU FORMAT TABLE (comme “Prochains cours”) */}
+      {/* Liste au FORMAT TABLE comme “Prochains cours” */}
       {!loading && !err && (
         <Card header="Demandes & affectations">
           {rows.length === 0 ? (
