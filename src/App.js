@@ -34,7 +34,6 @@ function App() {
             <Route path="/connexion" element={<PublicRoute><Login /></PublicRoute>} />
             {/* Profil (protégé) */}
             <Route path="/profil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-
             {/* Dashboard parent (protégé) */}
             <Route
               path="/dashboard/*"
