@@ -37,26 +37,12 @@ function App() {
             {/* Dashboard parent (protégé) */}
             <Route path="/dashboard/*" element={<ProtectedRoute /* roles={['ROLE_PARENT']} si ton ProtectedRoute gère les rôles */>
                   <DashboardRoutes /></ProtectedRoute>}/>
-
             {/* 👉 Assignments Parent : page “Professeurs” */}
-            <Route
-              path="/dashboard/profs"
-              element={
-                <ProtectedRoute /* roles={['ROLE_PARENT']} */>
-                  <ParentAssignments />
-                </ProtectedRoute>
-              }
-            />
-
+            <Route path="/dashboard/profs" element={<ProtectedRoute /* roles={['ROLE_PARENT']} */>
+                  <ParentAssignments /></ProtectedRoute>} />
             {/* 👉 Assignments Prof */}
-            <Route
-              path="/teacher/assignments"
-              element={
-                <ProtectedRoute /* roles={['ROLE_TEACHER']} */>
-                  <TeacherAssignments />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/teacher/assignments" element={<ProtectedRoute /* roles={['ROLE_TEACHER']} */>
+                  <TeacherAssignments /></ProtectedRoute>} />
 
             {/* 👉 Assignments Admin */}
             <Route
