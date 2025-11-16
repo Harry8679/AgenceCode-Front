@@ -35,14 +35,8 @@ function App() {
             {/* Profil (protégé) */}
             <Route path="/profil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             {/* Dashboard parent (protégé) */}
-            <Route
-              path="/dashboard/*"
-              element={
-                <ProtectedRoute /* roles={['ROLE_PARENT']} si ton ProtectedRoute gère les rôles */>
-                  <DashboardRoutes />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/dashboard/*" element={<ProtectedRoute /* roles={['ROLE_PARENT']} si ton ProtectedRoute gère les rôles */>
+                  <DashboardRoutes /></ProtectedRoute>}/>
 
             {/* 👉 Assignments Parent : page “Professeurs” */}
             <Route
